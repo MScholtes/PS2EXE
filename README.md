@@ -7,7 +7,7 @@ You find the script based version here: [PS2EXE-GUI: "Convert" PowerShell Script
 
 Author: Markus Scholtes
 
-Version: 1.0.0.2
+Version: 1.0.0
 
 Date: 2019-11-08
 
@@ -43,6 +43,7 @@ ps2exe [-inputFile] '<file_name>' [[-outputFile] '<file_name>'] [-verbose]
        [-virtualize] [-longPaths]
 ```
 
+```
     inputFile = Powershell script that you want to convert to executable
    outputFile = destination executable file name, defaults to inputFile with extension '.exe'
     runtime20 = this switch forces PS2EXE to create a config file for the generated executable that contains the
@@ -69,15 +70,18 @@ credentialGUI = use GUI for prompting credentials in console mode
     supportOS = use functions of newest Windows versions (execute [Environment]::OSVersion to see the difference)
 	 virtualize = application virtualization is activated (forcing x86 runtime)
     longPaths = enable long paths ( > 260 characters) if enabled on OS (works only with Windows 10)
+```
 
 A generated executables has the following reserved parameters:
 
+```
 -debug              Forces the executable to be debugged. It calls "System.Diagnostics.Debugger.Break()".
 -extract:<FILENAME> Extracts the powerShell script inside the executable and saves it as FILENAME.
                     The script will not be executed.
 -wait               At the end of the script execution it writes "Hit any key to exit..." and waits for a key to be pressed.
 -end                All following options will be passed to the script inside the executable.
                     All preceding options are used by the executable itself and will not be passed to the script.
+```
 
 
 ## Remarks
@@ -88,13 +92,14 @@ Per default in powershell outputs of commandlets are formatted line per line (as
 ### Config files:
 PS2EXE can create config files with the name of the generated executable + ".config". In most cases those config files are not necessary, they are a manifest that tells which .Net Framework version should be used. As you will usually use the actual .Net Framework, try running your excutable without the config file.
 
-## Password security:
+### Password security:
 Never store passwords in your compiled script! One can simply decompile the script with the parameter -extract. For example 
+```powershell
 Output.exe -extract:C:\Output.ps1
-
+```
 will decompile the script stored in Output.exe.
 
-## Script variables:
+### Script variables:
 Since PS2EXE converts a script to an executable, script related variables are not available anymore. Especially the variable $PSScriptRoot is empty.
 
 The variable $MyInvocation is set to other values than in a script.
@@ -109,7 +114,7 @@ if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript")
      if (!$ScriptPath){ $ScriptPath = "." } }
 ```
 
-## Window in background in -noConsole mode:
+### Window in background in -noConsole mode:
 When an external window is opened in a script with -noConsole mode (i.e. for Get-Credential or for a command that needs a cmd.exe shell) the next window is opened in the background.
 
 The reason for this is that on closing the external window windows tries to activate the parent window. Since the compiled script has no window, the parent window of the compiled script is activated instead, normally the window of Explorer or Powershell.
