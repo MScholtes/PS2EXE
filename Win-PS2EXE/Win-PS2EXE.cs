@@ -1,4 +1,4 @@
-// Win-PS2EXE v1.0.0.1
+// Win-PS2EXE v1.0.0.3
 // Front end to Powershell-Script-to-EXE-Compiler PS2EXE.ps1: https://gallery.technet.microsoft.com/PS2EXE-GUI-Convert-e7cb69d5
 // Markus Scholtes, 2019
 //
@@ -27,8 +27,8 @@ using System.Reflection;
 [assembly:AssemblyCopyright("© Markus Scholtes 2019")]
 [assembly:AssemblyTrademark("")]
 [assembly:AssemblyCulture("")]
-[assembly:AssemblyVersion("1.0.0.2")]
-[assembly:AssemblyFileVersion("1.0.0.2")]
+[assembly:AssemblyVersion("1.0.0.3")]
+[assembly:AssemblyFileVersion("1.0.0.3")]
 
 namespace WPFApplication
 {
@@ -339,17 +339,17 @@ namespace WPFApplication
 		<TextBlock Height=""32"" Margin=""0,10,0,0"" FontSize=""16"" Grid.Row=""0"" Grid.Column=""1"" >Win-PS2EXE: Graphical front end to PS2EXE-GUI</TextBlock>
 
 		<Label Grid.Row=""1"" Grid.Column=""0"">Source file: </Label>
-		<TextBox x:Name=""SourceFile"" Height=""18"" Margin=""0,0,10,0"" AllowDrop=""True"" ToolTip=""Path and name of the source file (the only mandatory field)"" Grid.Row=""1"" Grid.Column=""1""
+		<TextBox x:Name=""SourceFile"" Height=""18"" Width=""362"" Margin=""0,0,10,0"" AllowDrop=""True"" ToolTip=""Path and name of the source file (the only mandatory field)"" Grid.Row=""1"" Grid.Column=""1""
 			PreviewDragEnter=""TextBox_PreviewDragOver"" PreviewDragOver=""TextBox_PreviewDragOver"" PreviewDrop=""TextBox_PreviewDrop"" />
 		<Button x:Name=""SourceFilePicker"" Background=""#FFD0D0D0"" Height=""18"" Width=""24"" Content=""..."" ToolTip=""File picker for source file"" Grid.Row=""1"" Grid.Column=""2""
 			Click=""FilePicker_Click"" />
 
 		<Label Grid.Row=""2"" Grid.Column=""0"">Target file: </Label>
-		<TextBox x:Name=""TargetFile"" Height=""18"" Margin=""0,0,10,0"" AllowDrop=""True"" ToolTip=""Optional: Name and possibly path of the target file"" Grid.Row=""2"" Grid.Column=""1""
+		<TextBox x:Name=""TargetFile"" Height=""18"" Width=""362"" Margin=""0,0,10,0"" AllowDrop=""True"" ToolTip=""Optional: Name and possibly path of the target file"" Grid.Row=""2"" Grid.Column=""1""
 			PreviewDragEnter=""TextBox_PreviewDragOver"" PreviewDragOver=""TextBox_PreviewDragOver"" PreviewDrop=""TextBox_PreviewDrop"" />
 
 		<Label Grid.Row=""3"" Grid.Column=""0"">Icon file: </Label>
-		<TextBox x:Name=""IconFile"" Height=""18"" Margin=""0,0,10,0"" AllowDrop=""True"" ToolTip=""Optional: Name and possibly path of the icon file"" Grid.Row=""3"" Grid.Column=""1""
+		<TextBox x:Name=""IconFile"" Height=""18"" Width=""362"" Margin=""0,0,10,0"" AllowDrop=""True"" ToolTip=""Optional: Name and possibly path of the icon file"" Grid.Row=""3"" Grid.Column=""1""
 			PreviewDragEnter=""TextBox_PreviewDragOver"" PreviewDragOver=""TextBox_PreviewDragOver"" PreviewDrop=""TextBox_PreviewDrop"" />
 		<Button x:Name=""IconFilePicker"" Background=""#FFD0D0D0"" Height=""18"" Width=""24"" Content=""..."" ToolTip=""File picker for icon file"" Grid.Row=""3"" Grid.Column=""2""
 			Click=""FilePicker_Click"" />

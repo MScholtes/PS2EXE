@@ -3,11 +3,11 @@ Graphical front end to the module version of the PS1-to-EXE-compiler PS2EXE
 
 Author: Markus Scholtes
 
-Version: 1.0.0.2
+Version: 1.0.0.3
 
-Date: 2019-11-08
+Date: 2019-12-16
 
-With [PS2EXE](https://gallery.technet.microsoft.com/PS2EXE-GUI-Convert-e7cb69d5) originally created by Ingo Karstein you can compile Powershell scripts to real Windows executables. **Win-PS2EXE** is a small graphical front end to the script. 
+With [PS2EXE](https://gallery.technet.microsoft.com/PS2EXE-GUI-Convert-e7cb69d5) originally created by Ingo Karstein you can compile Powershell scripts to real Windows executables. **Win-PS2EXE** is a small graphical front end to the script.
 
 ### Features and restrictions:
 * **Win-PS2EXE** does not support all parameters of **PS2EXE**
@@ -27,3 +27,8 @@ Install module **PS2EXE**.
 Start **Win-PS2EXE** by typing Win-PS2EXE in a powershell console and fill in the desired fields (only *Source file* is mandatory).
 
 Click **Compile**, a powershell window opens and your powershell script will be compiled to an executable.
+
+### Changes:
+1.0.0.3: file fields no longer run out
+
+1.0.0.2: -noConfigFile is default now
