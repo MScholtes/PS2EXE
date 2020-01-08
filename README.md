@@ -130,6 +130,9 @@ $Host.UI.RawUI.FlushInputBuffer()
 ```
 
 ## Changes:
+### 1.0.2 / 2020-01-08
+Added examples
+
 ### 1.0.1 / 2019-12-15
 Fixed "unlimited window width for GUI windows" issue in ps2exe.ps1 and Win-PS2EXE
 
