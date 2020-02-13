@@ -1980,7 +1980,7 @@ $(if (!$noConsole) {@"
 						Console.Write("\b \b");
 					}
 				}
-				else
+				else if (i.KeyChar != '\u0000')
 				{
 					pwd.AppendChar(i.KeyChar);
 					Console.Write("*");
