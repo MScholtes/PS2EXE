@@ -7,9 +7,9 @@ You find the script based version here: [PS2EXE-GUI: "Convert" PowerShell Script
 
 Author: Markus Scholtes
 
-Version: 1.0.2
+Version: 1.0.3
 
-Date: 2020-01-08
+Date: 2020-02-15
 
 ## Installation
 
@@ -130,10 +130,14 @@ $Host.UI.RawUI.FlushInputBuffer()
 ```
 
 ## Changes:
+### 1.0.3 / 2020-02-15
+Converted files from UTF-16 to UTF-8 to allow git diff
+Ignore control keys in secure string request in console mode
+
 ### 1.0.2 / 2020-01-08
 Added examples
 
-### 1.0.1 / 2019-12-15
+### 1.0.1 / 2019-12-16
 Fixed "unlimited window width for GUI windows" issue in ps2exe.ps1 and Win-PS2EXE
 
 ### 1.0.0 / 2019-11-08
