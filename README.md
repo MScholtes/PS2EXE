@@ -132,6 +132,7 @@ $Host.UI.RawUI.FlushInputBuffer()
 ## Changes:
 ### 1.0.3 / 2020-02-15
 Converted files from UTF-16 to UTF-8 to allow git diff
+
 Ignore control keys in secure string request in console mode
 
 ### 1.0.2 / 2020-01-08
