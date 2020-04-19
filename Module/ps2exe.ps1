@@ -63,6 +63,8 @@ compatibility parameter
 the resulting executable will generate no standard output (includes verbose and information channel)
 .PARAMETER noError
 the resulting executable will generate no error output (includes warning and debug channel)
+.PARAMETER noVisualStyles
+disable visual styles for a generated windows GUI application. Only applicable with parameter -noConsole
 .PARAMETER requireAdmin
 if UAC is enabled, compiled executable will run only in elevated context (UAC dialog appears if required)
 .PARAMETER supportOS
@@ -81,8 +83,8 @@ Compiles C:\Data\MyScript.ps1 to C:\Data\MyScriptGUI.exe as graphical executable
 Win-PS2EXE
 Start graphical front end to Invoke-ps2exe
 .NOTES
-Version: 0.5.0.19
-Date: 2020-02-15
+Version: 0.5.0.20
+Date: 2020-04-19
 Author: Ingo Karstein, Markus Scholtes
 .LINK
 https://www.powershellgallery.com/packages/ps2exe
@@ -93,12 +95,12 @@ function Invoke-ps2exe
 	Param([STRING]$inputFile = $NULL, [STRING]$outputFile = $NULL, [SWITCH]$verbose, [SWITCH]$debug, [SWITCH]$x86, [SWITCH]$x64,
 		[int]$lcid, [SWITCH]$STA, [SWITCH]$MTA, [SWITCH]$noConsole, [SWITCH]$credentialGUI, [STRING]$iconFile = $NULL,
 		[STRING]$title, [STRING]$description, [STRING]$company, [STRING]$product, [STRING]$copyright, [STRING]$trademark, [STRING]$version,
-		[SWITCH]$configFile, [SWITCH]$noConfigFile, [SWITCH]$noOutput, [SWITCH]$noError, [SWITCH]$requireAdmin, [SWITCH]$supportOS,
-		[SWITCH]$virtualize, [SWITCH]$longPaths)
+		[SWITCH]$configFile, [SWITCH]$noConfigFile, [SWITCH]$noOutput, [SWITCH]$noError, [SWITCH]$noVisualStyles, [SWITCH]$requireAdmin,
+		[SWITCH]$supportOS, [SWITCH]$virtualize, [SWITCH]$longPaths)
 
 <################################################################################>
 <##                                                                            ##>
-<##      PS2EXE-GUI v0.5.0.19                                                  ##>
+<##      PS2EXE-GUI v0.5.0.20                                                  ##>
 <##      Written by: Ingo Karstein (http://blog.karstein-consulting.com)       ##>
 <##      Reworked and GUI support by Markus Scholtes                           ##>
 <##                                                                            ##>
@@ -108,7 +110,7 @@ function Invoke-ps2exe
 <##                                                                            ##>
 <################################################################################>
 
-	Write-Output "PS2EXE-GUI v0.5.0.19 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
+	Write-Output "PS2EXE-GUI v0.5.0.20 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
 
 	if ([STRING]::IsNullOrEmpty($inputFile))
 	{
@@ -117,30 +119,31 @@ function Invoke-ps2exe
 		Write-Output "              [-debug] [-x86|-x64] [-lcid <id>] [-STA|-MTA] [-noConsole]"
 		Write-Output "              [-credentialGUI] [-iconFile '<filename>'] [-title '<title>'] [-description '<description>']"
 		Write-Output "              [-company '<company>'] [-product '<product>'] [-copyright '<copyright>'] [-trademark '<trademark>']"
-		Write-Output "              [-version '<version>'] [-configFile] [-noOutput] [-noError] [-requireAdmin] [-supportOS]"
-		Write-Output "              [-virtualize] [-longPaths]""`n"
-		Write-Output "    inputFile = Powershell script that you want to convert to executable"
-		Write-Output "   outputFile = destination executable file name, defaults to inputFile with extension '.exe'"
-		Write-Output "   x86 or x64 = compile for 32-bit or 64-bit runtime only"
-		Write-Output "         lcid = location ID for the compiled executable. Current user culture if not specified"
-		Write-Output "   STA or MTA = 'Single Thread Apartment' or 'Multi Thread Apartment' mode"
-		Write-Output "    noConsole = the resulting executable will be a Windows Forms app without a console window"
-		Write-Output "credentialGUI = use GUI for prompting credentials in console mode"
-		Write-Output "     iconFile = icon file name for the compiled executable"
-		Write-Output "        title = title information (displayed in details tab of Windows Explorer's properties dialog)"
-		Write-Output "  description = description information (not displayed, but embedded in executable)"
-		Write-Output "      company = company information (not displayed, but embedded in executable)"
-		Write-Output "      product = product information (displayed in details tab of Windows Explorer's properties dialog)"
-		Write-Output "    copyright = copyright information (displayed in details tab of Windows Explorer's properties dialog)"
-		Write-Output "    trademark = trademark information (displayed in details tab of Windows Explorer's properties dialog)"
-		Write-Output "      version = version information (displayed in details tab of Windows Explorer's properties dialog)"
-		Write-Output "   configFile = write a config file (<outputfile>.exe.config)"
-		Write-Output "     noOutput = the resulting executable will generate no standard output (includes verbose and information channel)"
-		Write-Output "      noError = the resulting executable will generate no error output (includes warning and debug channel)"
-		Write-Output " requireAdmin = if UAC is enabled, compiled executable run only in elevated context (UAC dialog appears if required)"
-		Write-Output "    supportOS = use functions of newest Windows versions (execute [Environment]::OSVersion to see the difference)"
-		Write-Output "   virtualize = application virtualization is activated (forcing x86 runtime)"
-		Write-Output "    longPaths = enable long paths ( > 260 characters) if enabled on OS (works only with Windows 10)`n"
+		Write-Output "              [-version '<version>'] [-configFile] [-noOutput] [-noError] [-noVisualStyles] [-requireAdmin]"
+		Write-Output "              [-supportOS] [-virtualize] [-longPaths]""`n"
+		Write-Output "     inputFile = Powershell script that you want to convert to executable"
+		Write-Output "    outputFile = destination executable file name, defaults to inputFile with extension '.exe'"
+		Write-Output "    x86 or x64 = compile for 32-bit or 64-bit runtime only"
+		Write-Output "          lcid = location ID for the compiled executable. Current user culture if not specified"
+		Write-Output "    STA or MTA = 'Single Thread Apartment' or 'Multi Thread Apartment' mode"
+		Write-Output "     noConsole = the resulting executable will be a Windows Forms app without a console window"
+		Write-Output " credentialGUI = use GUI for prompting credentials in console mode"
+		Write-Output "      iconFile = icon file name for the compiled executable"
+		Write-Output "         title = title information (displayed in details tab of Windows Explorer's properties dialog)"
+		Write-Output "   description = description information (not displayed, but embedded in executable)"
+		Write-Output "       company = company information (not displayed, but embedded in executable)"
+		Write-Output "       product = product information (displayed in details tab of Windows Explorer's properties dialog)"
+		Write-Output "     copyright = copyright information (displayed in details tab of Windows Explorer's properties dialog)"
+		Write-Output "     trademark = trademark information (displayed in details tab of Windows Explorer's properties dialog)"
+		Write-Output "       version = version information (displayed in details tab of Windows Explorer's properties dialog)"
+		Write-Output "    configFile = write a config file (<outputfile>.exe.config)"
+		Write-Output "      noOutput = the resulting executable will generate no standard output (includes verbose and information channel)"
+		Write-Output "       noError = the resulting executable will generate no error output (includes warning and debug channel)"
+		Write-Output "noVisualStyles = disable visual styles for a generated windows GUI application (only with -noConsole)"
+		Write-Output "  requireAdmin = if UAC is enabled, compiled executable run only in elevated context (UAC dialog appears if required)"
+		Write-Output "     supportOS = use functions of newest Windows versions (execute [Environment]::OSVersion to see the difference)"
+		Write-Output "    virtualize = application virtualization is activated (forcing x86 runtime)"
+		Write-Output "     longPaths = enable long paths ( > 260 characters) if enabled on OS (works only with Windows 10)`n"
 		Write-Output "Input file not specified!"
 		return
 	}
@@ -929,6 +932,8 @@ $(if ($noConsole){ @"
 		{
 			// Generate controls
 			Form form = new Form();
+			form.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			form.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			Label label = new Label();
 			TextBox textBox = new TextBox();
 			Button buttonOk = new Button();
@@ -1017,6 +1022,8 @@ $(if ($noConsole){ @"
 
 			// Generate controls
 			Form form = new Form();
+			form.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			form.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			RadioButton[] aradioButton = new RadioButton[aAuswahl.Count];
 			ToolTip toolTip = new ToolTip();
 			Button buttonOk = new Button();
@@ -1133,6 +1140,8 @@ $(if ($noConsole){ @"
 		{
 			public KeyboardForm()
 			{
+				this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+				this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 				this.KeyDown += new KeyEventHandler(KeyboardForm_KeyDown);
 				this.KeyUp += new KeyEventHandler(KeyboardForm_KeyUp);
 			}
@@ -1265,6 +1274,9 @@ $(if ($noConsole){ @"
 		private void InitializeComponent()
 		{
 			this.SuspendLayout();
+
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 
 			this.Text = "Progress";
 			this.Height = 160;
@@ -2144,7 +2156,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 		{
 			get
 			{
-				return new Version(0, 5, 0, 19);
+				return new Version(0, 5, 0, 20);
 			}
 		}
 
@@ -2202,6 +2214,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 		{
 			$culture
 
+			$(if (!$noVisualStyles -and $noConsole) { "Application.EnableVisualStyles();" })
 			PS2EXE me = new PS2EXE();
 
 			bool paramWait = false;
