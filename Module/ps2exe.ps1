@@ -83,8 +83,8 @@ Compiles C:\Data\MyScript.ps1 to C:\Data\MyScriptGUI.exe as graphical executable
 Win-PS2EXE
 Start graphical front end to Invoke-ps2exe
 .NOTES
-Version: 0.5.0.20
-Date: 2020-04-19
+Version: 0.5.0.21
+Date: 2020-07-11
 Author: Ingo Karstein, Markus Scholtes
 .LINK
 https://www.powershellgallery.com/packages/ps2exe
@@ -100,7 +100,7 @@ function Invoke-ps2exe
 
 <################################################################################>
 <##                                                                            ##>
-<##      PS2EXE-GUI v0.5.0.20                                                  ##>
+<##      PS2EXE-GUI v0.5.0.21                                                  ##>
 <##      Written by: Ingo Karstein (http://blog.karstein-consulting.com)       ##>
 <##      Reworked and GUI support by Markus Scholtes                           ##>
 <##                                                                            ##>
@@ -110,7 +110,7 @@ function Invoke-ps2exe
 <##                                                                            ##>
 <################################################################################>
 
-	Write-Output "PS2EXE-GUI v0.5.0.20 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
+	Write-Output "PS2EXE-GUI v0.5.0.21 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
 
 	if ([STRING]::IsNullOrEmpty($inputFile))
 	{
@@ -1241,12 +1241,21 @@ $(if ($noConsole){ @"
 
 	public class ProgressForm : Form
 	{
-		private Label objLblActivity;
-		private Label objLblStatus;
-		private ProgressBar objProgressBar;
-		private Label objLblRemainingTime;
-		private Label objLblOperation;
 		private ConsoleColor ProgressBarColor = ConsoleColor.DarkCyan;
+
+		struct ProgressData
+		{
+			internal Label lblActivity;
+			internal Label lblStatus;
+			internal ProgressBar objProgressBar;
+			internal Label lblRemainingTime;
+			internal Label lblOperation;
+			internal int ActivityId;
+			internal int ParentActivityId;
+			internal int Depth;
+		};
+
+		private List<ProgressData> progressDataList = new List<ProgressData>();
 
 		private Color DrawingColor(ConsoleColor color)
 		{  // convert ConsoleColor to System.Drawing.Color
@@ -1278,73 +1287,90 @@ $(if ($noConsole){ @"
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 
-			this.Text = "Progress";
-			this.Height = 160;
+			this.AutoScroll = true;
+			this.Text = System.AppDomain.CurrentDomain.FriendlyName;
+			this.Height = 147;
 			this.Width = 800;
 			this.BackColor = Color.White;
 			this.FormBorderStyle = FormBorderStyle.FixedSingle;
-			try {
-				this.Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
-			}
-			catch
-			{ }
 			this.MinimizeBox = false;
 			this.MaximizeBox = false;
+			this.ControlBox = false;
 			this.StartPosition = FormStartPosition.CenterScreen;
 
+			this.ResumeLayout();
+		}
+
+		private void AddBar(ref ProgressData pd, int position)
+		{
 			// Create Label
-			objLblActivity = new Label();
-			objLblActivity.Left = 5;
-			objLblActivity.Top = 10;
-			objLblActivity.Width = 800 - 20;
-			objLblActivity.Height = 16;
-			objLblActivity.Font = new Font(objLblActivity.Font, FontStyle.Bold);
-			objLblActivity.Text = "";
+			pd.lblActivity = new Label();
+			pd.lblActivity.Left = 5;
+			pd.lblActivity.Top = 104*position + 10;
+			pd.lblActivity.Width = 800 - 20;
+			pd.lblActivity.Height = 16;
+			pd.lblActivity.Font = new Font(pd.lblActivity.Font, FontStyle.Bold);
+			pd.lblActivity.Text = "";
 			// Add Label to Form
-			this.Controls.Add(objLblActivity);
+			this.Controls.Add(pd.lblActivity);
 
 			// Create Label
-			objLblStatus = new Label();
-			objLblStatus.Left = 25;
-			objLblStatus.Top = 26;
-			objLblStatus.Width = 800 - 40;
-			objLblStatus.Height = 16;
-			objLblStatus.Text = "";
+			pd.lblStatus = new Label();
+			pd.lblStatus.Left = 25;
+			pd.lblStatus.Top = 104*position + 26;
+			pd.lblStatus.Width = 800 - 40;
+			pd.lblStatus.Height = 16;
+			pd.lblStatus.Text = "";
 			// Add Label to Form
-			this.Controls.Add(objLblStatus);
+			this.Controls.Add(pd.lblStatus);
 
 			// Create ProgressBar
-			objProgressBar = new ProgressBar();
-			objProgressBar.Value = 0;
-			objProgressBar.Style = ProgressBarStyle.Continuous;
-			objProgressBar.ForeColor = DrawingColor(ProgressBarColor);
-			objProgressBar.Size = new System.Drawing.Size(800 - 60, 20);
-			objProgressBar.Left = 25;
-			objProgressBar.Top = 55;
+			pd.objProgressBar = new ProgressBar();
+			pd.objProgressBar.Value = 0;
+$(if ($noVisualStyles) {@"
+			pd.objProgressBar.Style = ProgressBarStyle.Continuous;
+"@ } else {@"
+			pd.objProgressBar.Style = ProgressBarStyle.Blocks;
+"@ })
+			pd.objProgressBar.ForeColor = DrawingColor(ProgressBarColor);
+			if (pd.Depth < 15)
+			{
+				pd.objProgressBar.Size = new System.Drawing.Size(800 - 60 - 30*pd.Depth, 20);
+				pd.objProgressBar.Left = 25 + 30*pd.Depth;
+			}
+			else
+			{
+				pd.objProgressBar.Size = new System.Drawing.Size(800 - 60 - 450, 20);
+				pd.objProgressBar.Left = 25 + 450;
+			}
+			pd.objProgressBar.Top = 104*position + 47;
 			// Add ProgressBar to Form
-			this.Controls.Add(objProgressBar);
+			this.Controls.Add(pd.objProgressBar);
 
 			// Create Label
-			objLblRemainingTime = new Label();
-			objLblRemainingTime.Left = 5;
-			objLblRemainingTime.Top = 85;
-			objLblRemainingTime.Width = 800 - 20;
-			objLblRemainingTime.Height = 16;
-			objLblRemainingTime.Text = "";
+			pd.lblRemainingTime = new Label();
+			pd.lblRemainingTime.Left = 5;
+			pd.lblRemainingTime.Top = 104*position + 72;
+			pd.lblRemainingTime.Width = 800 - 20;
+			pd.lblRemainingTime.Height = 16;
+			pd.lblRemainingTime.Text = "";
 			// Add Label to Form
-			this.Controls.Add(objLblRemainingTime);
+			this.Controls.Add(pd.lblRemainingTime);
 
 			// Create Label
-			objLblOperation = new Label();
-			objLblOperation.Left = 25;
-			objLblOperation.Top = 101;
-			objLblOperation.Width = 800 - 40;
-			objLblOperation.Height = 16;
-			objLblOperation.Text = "";
+			pd.lblOperation = new Label();
+			pd.lblOperation.Left = 25;
+			pd.lblOperation.Top = 104*position + 88;
+			pd.lblOperation.Width = 800 - 40;
+			pd.lblOperation.Height = 16;
+			pd.lblOperation.Text = "";
 			// Add Label to Form
-			this.Controls.Add(objLblOperation);
+			this.Controls.Add(pd.lblOperation);
+		}
 
-			this.ResumeLayout();
+		public int GetCount()
+		{
+			return progressDataList.Count;
 		}
 
 		public ProgressForm()
@@ -1363,51 +1389,166 @@ $(if ($noConsole){ @"
 			if (objRecord == null)
 				return;
 
+			int currentProgress = -1;
+			for (int i = 0; i < progressDataList.Count; i++)
+			{
+				if (progressDataList[i].ActivityId == objRecord.ActivityId)
+				{ currentProgress = i;
+					break;
+				}
+			}
+
 			if (objRecord.RecordType == ProgressRecordType.Completed)
 			{
-				this.Close();
+				if (currentProgress < 0) return;
+
+				this.Controls.Remove(progressDataList[currentProgress].lblActivity);
+				this.Controls.Remove(progressDataList[currentProgress].lblStatus);
+				this.Controls.Remove(progressDataList[currentProgress].objProgressBar);
+				this.Controls.Remove(progressDataList[currentProgress].lblRemainingTime);
+				this.Controls.Remove(progressDataList[currentProgress].lblOperation);
+
+				progressDataList[currentProgress].lblActivity.Dispose();
+				progressDataList[currentProgress].lblStatus.Dispose();
+				progressDataList[currentProgress].objProgressBar.Dispose();
+				progressDataList[currentProgress].lblRemainingTime.Dispose();
+				progressDataList[currentProgress].lblOperation.Dispose();
+
+				progressDataList.RemoveAt(currentProgress);
+
+				if (progressDataList.Count == 0)
+				{
+					this.Close();
+					return;
+				}
+
+				for (int i = currentProgress; i < progressDataList.Count; i++)
+				{
+					progressDataList[i].lblActivity.Top = 104*i + 10;
+					progressDataList[i].lblStatus.Top = 104*i + 26;
+					progressDataList[i].objProgressBar.Top = 104*i + 47;
+					progressDataList[i].lblRemainingTime.Top = 104*i + 72;
+					progressDataList[i].lblOperation.Top = 104*i + 88;
+				}
+
+				if (104*progressDataList.Count + 43 <= System.Windows.Forms.Screen.FromControl(this).Bounds.Height)
+				{
+					this.Height = 104*progressDataList.Count + 43;
+					this.Location = new Point((System.Windows.Forms.Screen.FromControl(this).Bounds.Width - this.Width)/2, (System.Windows.Forms.Screen.FromControl(this).Bounds.Height - this.Height)/2);
+				}
+				else
+				{
+					this.Height = System.Windows.Forms.Screen.FromControl(this).Bounds.Height;
+					this.Location = new Point((System.Windows.Forms.Screen.FromControl(this).Bounds.Width - this.Width)/2, 0);
+				}
+
 				return;
 			}
 
+			if (currentProgress < 0)
+			{
+				ProgressData pd = new ProgressData();
+				pd.ActivityId = objRecord.ActivityId;
+				pd.ParentActivityId = objRecord.ParentActivityId;
+				pd.Depth = 0;
+
+				int nextid = -1;
+				int parentid = -1;
+				if (pd.ParentActivityId >= 0)
+				{
+					for (int i = 0; i < progressDataList.Count; i++)
+					{
+						if (progressDataList[i].ActivityId == pd.ParentActivityId)
+						{ parentid = i;
+							break;
+						}
+					}
+				}
+
+				if (parentid >= 0)
+				{
+					pd.Depth = progressDataList[parentid].Depth + 1;
+
+					for (int i = parentid + 1; i < progressDataList.Count; i++)
+					{
+						if ((progressDataList[i].Depth < pd.Depth) || ((progressDataList[i].Depth == pd.Depth) && (progressDataList[i].ParentActivityId != pd.ParentActivityId)))
+						{ nextid = i;
+							break;
+						}
+					}
+				}
+
+				if (nextid == -1)
+				{
+					AddBar(ref pd, progressDataList.Count);
+					currentProgress = progressDataList.Count;
+					progressDataList.Add(pd);
+				}
+				else
+				{
+					AddBar(ref pd, nextid);
+					currentProgress = nextid;
+					progressDataList.Insert(nextid, pd);
+
+					for (int i = currentProgress+1; i < progressDataList.Count; i++)
+					{
+						progressDataList[i].lblActivity.Top = 104*i + 10;
+						progressDataList[i].lblStatus.Top = 104*i + 26;
+						progressDataList[i].objProgressBar.Top = 104*i + 47;
+						progressDataList[i].lblRemainingTime.Top = 104*i + 72;
+						progressDataList[i].lblOperation.Top = 104*i + 88;
+					}
+				}
+				if (104*progressDataList.Count + 43 <= System.Windows.Forms.Screen.FromControl(this).Bounds.Height)
+				{
+					this.Height = 104*progressDataList.Count + 43;
+					this.Location = new Point((System.Windows.Forms.Screen.FromControl(this).Bounds.Width - this.Width)/2, (System.Windows.Forms.Screen.FromControl(this).Bounds.Height - this.Height)/2);
+				}
+				else
+				{
+					this.Height = System.Windows.Forms.Screen.FromControl(this).Bounds.Height;
+					this.Location = new Point((System.Windows.Forms.Screen.FromControl(this).Bounds.Width - this.Width)/2, 0);
+				}
+			}
+
 			if (!string.IsNullOrEmpty(objRecord.Activity))
-				objLblActivity.Text = objRecord.Activity;
+				progressDataList[currentProgress].lblActivity.Text = objRecord.Activity;
 			else
-				objLblActivity.Text = "";
+				progressDataList[currentProgress].lblActivity.Text = "";
 
 			if (!string.IsNullOrEmpty(objRecord.StatusDescription))
-				objLblStatus.Text = objRecord.StatusDescription;
+				progressDataList[currentProgress].lblStatus.Text = objRecord.StatusDescription;
 			else
-				objLblStatus.Text = "";
+				progressDataList[currentProgress].lblStatus.Text = "";
 
 			if ((objRecord.PercentComplete >= 0) && (objRecord.PercentComplete <= 100))
 			{
-				objProgressBar.Value = objRecord.PercentComplete;
-				objProgressBar.Visible = true;
+				progressDataList[currentProgress].objProgressBar.Value = objRecord.PercentComplete;
+				progressDataList[currentProgress].objProgressBar.Visible = true;
 			}
 			else
 			{ if (objRecord.PercentComplete > 100)
 				{
-					objProgressBar.Value = 0;
-					objProgressBar.Visible = true;
+					progressDataList[currentProgress].objProgressBar.Value = 0;
+					progressDataList[currentProgress].objProgressBar.Visible = true;
 				}
 				else
-					objProgressBar.Visible = false;
+					progressDataList[currentProgress].objProgressBar.Visible = false;
 			}
 
 			if (objRecord.SecondsRemaining >= 0)
 			{
 				System.TimeSpan objTimeSpan = new System.TimeSpan(0, 0, objRecord.SecondsRemaining);
-				objLblRemainingTime.Text = "Remaining time: " + string.Format("{0:00}:{1:00}:{2:00}", (int)objTimeSpan.TotalHours, objTimeSpan.Minutes, objTimeSpan.Seconds);
+				progressDataList[currentProgress].lblRemainingTime.Text = "Remaining time: " + string.Format("{0:00}:{1:00}:{2:00}", (int)objTimeSpan.TotalHours, objTimeSpan.Minutes, objTimeSpan.Seconds);
 			}
 			else
-				objLblRemainingTime.Text = "";
+				progressDataList[currentProgress].lblRemainingTime.Text = "";
 
 			if (!string.IsNullOrEmpty(objRecord.CurrentOperation))
-				objLblOperation.Text = objRecord.CurrentOperation;
+				progressDataList[currentProgress].lblOperation.Text = objRecord.CurrentOperation;
 			else
-				objLblOperation.Text = "";
+				progressDataList[currentProgress].lblOperation.Text = "";
 
-			this.Refresh();
 			Application.DoEvents();
 		}
 	}
@@ -1967,7 +2108,7 @@ $(if ($noConsole) {@"
 			pf.Update(record);
 			if (record.RecordType == ProgressRecordType.Completed)
 			{
-				pf = null;
+				if (pf.GetCount() == 0) pf = null;
 			}
 "@ })
 		}
@@ -2156,7 +2297,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 		{
 			get
 			{
-				return new Version(0, 5, 0, 20);
+				return new Version(0, 5, 0, 21);
 			}
 		}
 
