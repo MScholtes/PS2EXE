@@ -7,9 +7,9 @@ You find the script based version here (https://github.com/MScholtes/TechNet-Gal
 
 Author: Markus Scholtes
 
-Version: 1.0.4
+Version: 1.0.5
 
-Date: 2020-04-19
+Date: 2020-07-11
 
 ## Installation
 
@@ -127,22 +127,25 @@ $Host.UI.RawUI.FlushInputBuffer()
 ```
 
 ## Changes:
+### 1.0.5 / 2020-07-11
+- support for nested progress bars (noConsole mode only)
+
 ### 1.0.4 / 2020-04-19
-Application.EnableVisualStyles() as default for GUI applications, new parameter -noVisualStyles to prevent this
+- Application.EnableVisualStyles() as default for GUI applications, new parameter -noVisualStyles to prevent this
 
 ### 1.0.3 / 2020-02-15
-Converted files from UTF-16 to UTF-8 to allow git diff
+- converted files from UTF-16 to UTF-8 to allow git diff
 
-Ignore control keys in secure string request in console mode
+- ignore control keys in secure string request in console mode
 
 ### 1.0.2 / 2020-01-08
-Added examples to github
+- added examples to github
 
 ### 1.0.1 / 2019-12-16
-Fixed "unlimited window width for GUI windows" issue in ps2exe.ps1 and Win-PS2EXE
+- fixed "unlimited window width for GUI windows" issue in ps2exe.ps1 and Win-PS2EXE
 
 ### 1.0.0 / 2019-11-08
-First stable module version
+- first stable module version
 
 ### 0.0.0 / 2019-09-15
-Experimental
+- experimental
