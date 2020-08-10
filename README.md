@@ -7,9 +7,9 @@ You find the script based version here (https://github.com/MScholtes/TechNet-Gal
 
 Author: Markus Scholtes
 
-Version: 1.0.5
+Version: 1.0.6
 
-Date: 2020-07-11
+Date: 2020-08-10
 
 ## Installation
 
@@ -89,6 +89,9 @@ Per default in powershell outputs of commandlets are formatted line per line (as
 ### Config files:
 PS2EXE can create config files with the name of the generated executable + ".config". In most cases those config files are not necessary, they are a manifest that tells which .Net Framework version should be used. As you will usually use the actual .Net Framework, try running your excutable without the config file.
 
+### Parameter processing:
+Compiled scripts process parameters like the original script does. One restriction comes from the Windows environment: for all executables all parameters have the type STRING, if there is no implicit conversion for your parameter type you have to convert explicitly in your script. You can even pipe content to the executable with the same restriction (all piped values have the type STRING).
+
 ### Password security:
 Never store passwords in your compiled script! One can simply decompile the script with the parameter -extract. For example 
 ```powershell
@@ -127,6 +130,12 @@ $Host.UI.RawUI.FlushInputBuffer()
 ```
 
 ## Changes:
+### 1.0.6 / 2020-08-10
+- prompt for choice behaves like Powershell now (console mode only)
+- (limited) support for Powershell Core (starts Windows Powershell in the background)
+- fixed processing of negative parameter values
+- support for animated progress bars (noConsole mode only)
+
 ### 1.0.5 / 2020-07-11
 - support for nested progress bars (noConsole mode only)
 
