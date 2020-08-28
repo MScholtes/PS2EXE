@@ -7,9 +7,9 @@ You find the script based version here (https://github.com/MScholtes/TechNet-Gal
 
 Author: Markus Scholtes
 
-Version: 1.0.6
+Version: 1.0.7
 
-Date: 2020-08-10
+Date: 2020-08-21
 
 ## Installation
 
@@ -69,7 +69,7 @@ noVisualStyles = disable visual styles for a generated windows GUI application (
      longPaths = enable long paths ( > 260 characters) if enabled on OS (works only with Windows 10)
 ```
 
-A generated executables has the following reserved parameters:
+A generated executable has the following reserved parameters:
 
 ```
 -debug              Forces the executable to be debugged. It calls "System.Diagnostics.Debugger.Break()".
@@ -130,6 +130,9 @@ $Host.UI.RawUI.FlushInputBuffer()
 ```
 
 ## Changes:
+### 1.0.7 / 2020-08-21
+- bug fix for simultanous progrss bars in one pipeline
+
 ### 1.0.6 / 2020-08-10
 - prompt for choice behaves like Powershell now (console mode only)
 - (limited) support for Powershell Core (starts Windows Powershell in the background)
