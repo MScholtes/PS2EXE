@@ -112,7 +112,7 @@ PrivateData = @{
 		# ReleaseNotes of this module
 		ReleaseNotes = @'
 # 1.0.7 / 2020-08-21
-- bug fix for simultanous progrss bars in one pipeline
+- bug fix for simultanous progress bars in one pipeline
 # 1.0.6 / 2020-08-10
 - prompt for choice behaves like Powershell now (only for console mode)
 - (limited) support for Powershell Core (starts Windows Powershell in the background)
