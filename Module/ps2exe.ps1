@@ -85,8 +85,8 @@ Compiles C:\Data\MyScript.ps1 to C:\Data\MyScriptGUI.exe as graphical executable
 Win-PS2EXE
 Start graphical front end to Invoke-ps2exe
 .NOTES
-Version: 0.5.0.22
-Date: 2020-08-09
+Version: 0.5.0.23
+Date: 2020-08-21
 Author: Ingo Karstein, Markus Scholtes
 .LINK
 https://www.powershellgallery.com/packages/ps2exe
@@ -102,7 +102,7 @@ function Invoke-ps2exe
 
 <################################################################################>
 <##                                                                            ##>
-<##      PS2EXE-GUI v0.5.0.22                                                  ##>
+<##      PS2EXE-GUI v0.5.0.23                                                  ##>
 <##      Written by: Ingo Karstein (http://blog.karstein-consulting.com)       ##>
 <##      Reworked and GUI support by Markus Scholtes                           ##>
 <##                                                                            ##>
@@ -114,7 +114,7 @@ function Invoke-ps2exe
 
 	if (!$nested)
 	{
-		Write-Output "PS2EXE-GUI v0.5.0.22 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
+		Write-Output "PS2EXE-GUI v0.5.0.23 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
 	}
 	else
 	{
@@ -1470,24 +1470,25 @@ $(if ($noVisualStyles) {@"
 
 			if (objRecord.RecordType == ProgressRecordType.Completed)
 			{
-				if (currentProgress < 0) return;
+				if (currentProgress >= 0)
+				{
 $(if (!$noVisualStyles) {@"
-				if (barNumber == currentProgress) barNumber = -1;
+					if (barNumber == currentProgress) barNumber = -1;
 "@ })
+					this.Controls.Remove(progressDataList[currentProgress].lblActivity);
+					this.Controls.Remove(progressDataList[currentProgress].lblStatus);
+					this.Controls.Remove(progressDataList[currentProgress].objProgressBar);
+					this.Controls.Remove(progressDataList[currentProgress].lblRemainingTime);
+					this.Controls.Remove(progressDataList[currentProgress].lblOperation);
 
-				this.Controls.Remove(progressDataList[currentProgress].lblActivity);
-				this.Controls.Remove(progressDataList[currentProgress].lblStatus);
-				this.Controls.Remove(progressDataList[currentProgress].objProgressBar);
-				this.Controls.Remove(progressDataList[currentProgress].lblRemainingTime);
-				this.Controls.Remove(progressDataList[currentProgress].lblOperation);
+					progressDataList[currentProgress].lblActivity.Dispose();
+					progressDataList[currentProgress].lblStatus.Dispose();
+					progressDataList[currentProgress].objProgressBar.Dispose();
+					progressDataList[currentProgress].lblRemainingTime.Dispose();
+					progressDataList[currentProgress].lblOperation.Dispose();
 
-				progressDataList[currentProgress].lblActivity.Dispose();
-				progressDataList[currentProgress].lblStatus.Dispose();
-				progressDataList[currentProgress].objProgressBar.Dispose();
-				progressDataList[currentProgress].lblRemainingTime.Dispose();
-				progressDataList[currentProgress].lblOperation.Dispose();
-
-				progressDataList.RemoveAt(currentProgress);
+					progressDataList.RemoveAt(currentProgress);
+				}
 
 				if (progressDataList.Count == 0)
 				{
@@ -1498,6 +1499,8 @@ $(if (!$noVisualStyles) {@"
 					this.Close();
 					return;
 				}
+
+				if (currentProgress < 0) return;
 
 				for (int i = currentProgress; i < progressDataList.Count; i++)
 				{
@@ -2203,6 +2206,7 @@ $(if ($noConsole) {@"
 $(if ($noConsole) {@"
 			if (pf == null)
 			{
+				if (record.RecordType == ProgressRecordType.Completed) return;
 				pf = new ProgressForm(ProgressForegroundColor);
 				pf.Show();
 			}
@@ -2398,7 +2402,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 		{
 			get
 			{
-				return new Version(0, 5, 0, 22);
+				return new Version(0, 5, 0, 23);
 			}
 		}
 
