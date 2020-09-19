@@ -5,7 +5,7 @@
 
 **If this is not successful, then I will have to quit PS2EXE as nobody can use it anymore.**
 
-**Thanks for your support**
+**Thank you for your support**
 
 # PS2EXE
 Overworking of the great script of Ingo Karstein with GUI support. The GUI output and input is activated with one switch, real windows executables are generated. With Powershell 5.x support and graphical front end.
