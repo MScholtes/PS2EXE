@@ -16,9 +16,9 @@ You find the script based version here (https://github.com/MScholtes/TechNet-Gal
 
 Author: Markus Scholtes
 
-Version: 1.0.7
+Version: 1.0.8
 
-Date: 2020-08-21
+Date: 2020-10-24
 
 ## Installation
 
@@ -139,6 +139,9 @@ $Host.UI.RawUI.FlushInputBuffer()
 ```
 
 ## Changes:
+### 1.0.8 / 2020-10-24
+- refactored
+
 ### 1.0.7 / 2020-08-21
 - bug fix for simultanous progress bars in one pipeline
 
