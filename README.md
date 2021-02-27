@@ -1,5 +1,5 @@
 # Attention: Incorrect virus detection
-**Some stupid idiot seems to have abused PS2EXE to compile his computer virus script. As a result, a rapidly growing number of virus scanners recognize programs created with PS2EXE as malicious programs and delete them.**
+**Some (really) stupid idiot seems to have abused PS2EXE to compile his computer virus script. As a result, a rapidly growing number of virus scanners recognize programs created with PS2EXE as malicious programs and delete them.**
 
 **There is only one hope to save the PS2EXE project: Please send your (harmless) programs created with PS2EXE via the web forms from the virus scanners' vendors for reporting false positives (I've already done it with some of them, please use only the false positive page)!**
 
