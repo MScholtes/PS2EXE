@@ -54,7 +54,7 @@ ps2exe [-inputFile] '<file_name>' [[-outputFile] '<file_name>'] [-prepareDebug]
 
 ```
       inputFile = Powershell script that you want to convert to executable
-     outputFile = destination executable file name, defaults to inputFile with extension '.exe'
+     outputFile = destination executable file name or folder, defaults to inputFile with extension '.exe'
    prepareDebug = create helpful information for debugging    
      x86 or x64 = compile for 32-bit or 64-bit runtime only
            lcid = location ID for the compiled executable. Current user culture if not specified
