@@ -3,9 +3,9 @@ Graphical front end to the module version of the PS1-to-EXE-compiler PS2EXE
 
 Author: Markus Scholtes
 
-Version: 1.0.0.3
+Version: 1.0.1.1
 
-Date: 2019-12-16
+Date: 2021-04-10
 
 With [PS2EXE](https://gallery.technet.microsoft.com/PS2EXE-GUI-Convert-e7cb69d5) originally created by Ingo Karstein you can compile Powershell scripts to real Windows executables. **Win-PS2EXE** is a small graphical front end to the script.
 
@@ -29,6 +29,8 @@ Start **Win-PS2EXE** by typing Win-PS2EXE in a powershell console and fill in th
 Click **Compile**, a powershell window opens and your powershell script will be compiled to an executable.
 
 ### Changes:
+1.0.1.1: target folder dialog added (code by Josip Medved, https://www.medo64.com/2011/12/openfolderdialog/)
+
 1.0.0.3: file fields no longer run out
 
 1.0.0.2: -noConfigFile is default now
