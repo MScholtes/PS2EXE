@@ -16,9 +16,9 @@ You find the script based version here (https://github.com/MScholtes/TechNet-Gal
 
 Author: Markus Scholtes
 
-Version: 1.0.9
+Version: 1.0.10
 
-Date: 2021-02-28
+Date: 2021-04-10
 
 ## Installation
 
@@ -141,6 +141,9 @@ $Host.UI.RawUI.FlushInputBuffer()
 ```
 
 ## Changes:
+### 1.0.10 / 2021-04-10
+- parameter outputFile now accepts a target folder (without filename)
+
 ### 1.0.9 / 2021-02-28
 - new parameter UNICODEEncoding to output as UNICODE
 - changed parameter debug to prepareDebug
