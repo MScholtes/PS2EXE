@@ -16,9 +16,9 @@ You find the script based version here (https://github.com/MScholtes/TechNet-Gal
 
 Author: Markus Scholtes
 
-Version: 1.0.10
+Version: 1.0.11
 
-Date: 2021-04-10
+Date: 2021-11-21
 
 ## Installation
 
@@ -44,12 +44,12 @@ or start Win-PS2EXE for a graphical front end with
 
 ## Parameter
 ```powershell
-ps2exe [-inputFile] '<file_name>' [[-outputFile] '<file_name>'] [-prepareDebug]
-       [-x86|-x64] [-lcid <id>] [-STA|-MTA] [-noConsole] [-UNICODEEncoding]
+ps2exe [-inputFile] '<file_name>' [[-outputFile] '<file_name>']
+       [-prepareDebug] [-x86|-x64] [-lcid <id>] [-STA|-MTA] [-noConsole] [-UNICODEEncoding]
        [-credentialGUI] [-iconFile '<filename>'] [-title '<title>'] [-description '<description>']
        [-company '<company>'] [-product '<product>'] [-copyright '<copyright>'] [-trademark '<trademark>']
-       [-version '<version>'] [-configFile] [-noOutput] [-noError] [-noVisualStyles] [-requireAdmin]
-       [-supportOS] [-virtualize] [-longPaths]
+       [-version '<version>'] [-configFile] [-noOutput] [-noError] [-noVisualStyles] [-exitOnCancel]
+       [-DPIAware] [-requireAdmin] [-supportOS] [-virtualize] [-longPaths]
 ```
 
 ```
@@ -73,7 +73,9 @@ UNICODEEncoding = encode output as UNICODE in console mode
      configFile = write config file (<outputfile>.exe.config)
        noOutput = the resulting executable will generate no standard output (includes verbose and information channel)
         noError = the resulting executable will generate no error output (includes warning and debug channel)
- noVisualStyles = disable visual styles for a generated windows GUI application (only with -noConsole)      
+ noVisualStyles = disable visual styles for a generated windows GUI application (only with -noConsole)
+   exitOnCancel = exits program when Cancel or "X" is selected in a Read-Host input box (only with -noConsole)
+       DPIAware = if display scaling is activated, GUI controls will be scaled if possible (only with -noConsole)
    requireAdmin = if UAC is enabled, compiled executable run only in elevated context (UAC dialog appears if required)
       supportOS = use functions of newest Windows versions (execute [Environment]::OSVersion to see the difference)
      virtualize = application virtualization is activated (forcing x86 runtime)
@@ -144,6 +146,11 @@ $Host.UI.RawUI.FlushInputBuffer()
 ```
 
 ## Changes:
+### 1.0.11 / 2021-11-21
+- fixed password longer than 24 characters error
+- new parameter -DPIAware to support scaling in noConsole mode
+- new parameter -exitOnCancel to stop program execution on cancel in input boxes (only in noConsole mode)
+
 ### 1.0.10 / 2021-04-10
 - parameter outputFile now accepts a target folder (without filename)
 
