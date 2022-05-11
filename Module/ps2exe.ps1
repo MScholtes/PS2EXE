@@ -79,6 +79,8 @@ if display scaling is activated, GUI controls will be scaled if possible. Only a
 if UAC is enabled, compiled executable will run only in elevated context (UAC dialog appears if required)
 .PARAMETER supportOS
 use functions of newest Windows versions (execute [Environment]::OSVersion to see the difference)
+.PARAMETER net48
+compile for .NET Framework 4.8 (required for WinForms DPI aware scaling features)
 .PARAMETER virtualize
 application virtualization is activated (forcing x86 runtime)
 .PARAMETER longPaths
@@ -108,7 +110,7 @@ function Invoke-ps2exe
 		[SWITCH]$STA, [SWITCH]$MTA, [SWITCH]$nested, [SWITCH]$noConsole, [SWITCH]$UNICODEEncoding, [SWITCH]$credentialGUI, [STRING]$iconFile = $NULL,
 		[STRING]$title, [STRING]$description, [STRING]$company, [STRING]$product, [STRING]$copyright, [STRING]$trademark, [STRING]$version,
 		[SWITCH]$configFile, [SWITCH]$noConfigFile, [SWITCH]$noOutput, [SWITCH]$noError, [SWITCH]$noVisualStyles, [SWITCH]$exitOnCancel,
-		[SWITCH]$DPIAware, [SWITCH]$requireAdmin, [SWITCH]$supportOS, [SWITCH]$virtualize, [SWITCH]$longPaths)
+		[SWITCH]$DPIAware, [SWITCH]$requireAdmin, [SWITCH]$supportOS, [SWITCH]$net48, [SWITCH]$virtualize, [SWITCH]$longPaths)
 
 <################################################################################>
 <##                                                                            ##>
@@ -135,11 +137,11 @@ function Invoke-ps2exe
 	{
 		Write-Output "Usage:`n"
 		Write-Output "Invoke-ps2exe [-inputFile] '<filename>' [[-outputFile] '<filename>']"
-		Write-Output "              [-prepareDebug] [-x86|-x64] [-lcid <id>] [-STA|-MTA] [-noConsole] [-UNICODEEncoding]"
-		Write-Output "              [-credentialGUI] [-iconFile '<filename>'] [-title '<title>'] [-description '<description>']"
-		Write-Output "              [-company '<company>'] [-product '<product>'] [-copyright '<copyright>'] [-trademark '<trademark>']"
-		Write-Output "              [-version '<version>'] [-configFile] [-noOutput] [-noError] [-noVisualStyles] [-exitOnCancel]"
-		Write-Output "              [-DPIAware] [-requireAdmin] [-supportOS] [-virtualize] [-longPaths]`n"
+		Write-Output "             [-prepareDebug] [-x86|-x64] [-lcid <id>] [-STA|-MTA] [-noConsole] [-UNICODEEncoding]"
+		Write-Output "             [-credentialGUI] [-iconFile '<filename>'] [-title '<title>'] [-description '<description>']"
+		Write-Output "             [-company '<company>'] [-product '<product>'] [-copyright '<copyright>'] [-trademark '<trademark>']"
+		Write-Output "             [-version '<version>'] [-configFile] [-noOutput] [-noError] [-noVisualStyles] [-exitOnCancel]"
+		Write-Output "             [-DPIAware] [-requireAdmin] [-supportOS] [-net48] [-virtualize] [-longPaths]`n"
 		Write-Output "      inputFile = Powershell script that you want to convert to executable (file has to be UTF8 or UTF16 encoded)"
 		Write-Output "     outputFile = destination executable file name or folder, defaults to inputFile with extension '.exe'"
 		Write-Output "   prepareDebug = create helpful information for debugging"
@@ -165,6 +167,7 @@ function Invoke-ps2exe
 		Write-Output "       DPIAware = if display scaling is activated, GUI controls will be scaled if possible (only with -noConsole)"
 		Write-Output "   requireAdmin = if UAC is enabled, compiled executable run only in elevated context (UAC dialog appears if required)"
 		Write-Output "      supportOS = use functions of newest Windows versions (execute [Environment]::OSVersion to see the difference)"
+		Write-Output "          net48 = compile for .NET Framework 4.8 (required for WinForms DPI aware scaling features)"
 		Write-Output "     virtualize = application virtualization is activated (forcing x86 runtime)"
 		Write-Output "      longPaths = enable long paths ( > 260 characters) if enabled on OS (works only with Windows 10)`n"
 		Write-Output "Input file not specified!"
@@ -446,6 +449,9 @@ $(if ($noConsole) {@"
 using System.Windows.Forms;
 using System.Drawing;
 "@ })
+$(if ($net48) {@"
+using System.Runtime.Versioning;
+"@ })
 
 [assembly:AssemblyTitle("$title")]
 [assembly:AssemblyProduct("$product")]
@@ -458,6 +464,9 @@ $(if (![STRING]::IsNullOrEmpty($version)) {@"
 // not displayed in details tab of properties dialog, but embedded to file
 [assembly:AssemblyDescription("$description")]
 [assembly:AssemblyCompany("$company")]
+$(if ($net48) {@"
+[assembly:TargetFrameworkAttribute(".NETFramework,Version=v4.8,Profile=Client",FrameworkDisplayName=".NET Framework 4.8")]
+"@ })
 
 namespace ModuleNameSpace
 {
@@ -2720,11 +2729,13 @@ $(if (!$noConsole) {@"
 }
 "@
 
-	$configFileForEXE3 = "<?xml version=""1.0"" encoding=""utf-8"" ?>`r`n<configuration><startup><supportedRuntime version=""v4.0"" sku="".NETFramework,Version=v4.0"" /></startup></configuration>"
+	$netVersion = if ($net48) { 'v4.8' } else { 'v4.0 '}
+	$configFileForEXE3 = "<?xml version=""1.0"" encoding=""utf-8"" ?>`r`n<configuration><startup><supportedRuntime version=""v4.0"" sku="".NETFramework,Version=$netVersion"" /></startup>"
 	if ($longPaths)
 	{
-		$configFileForEXE3 = "<?xml version=""1.0"" encoding=""utf-8"" ?>`r`n<configuration><startup><supportedRuntime version=""v4.0"" sku="".NETFramework,Version=v4.0"" /></startup><runtime><AppContextSwitchOverrides value=""Switch.System.IO.UseLegacyPathHandling=false;Switch.System.IO.BlockLongPaths=false"" /></runtime></configuration>"
+		$configFileForEXE3 += "<runtime><AppContextSwitchOverrides value=""Switch.System.IO.UseLegacyPathHandling=false;Switch.System.IO.BlockLongPaths=false"" /></runtime>"
 	}
+	$configFileForEXE3 += "</configuration>"
 
 	Write-Output "Compiling file...`n"
 	$cr = $cop.CompileAssemblyFromSource($cp, $programFrame)
