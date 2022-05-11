@@ -75,6 +75,8 @@ disable visual styles for a generated windows GUI application. Only applicable w
 exits program when Cancel or "X" is selected in a Read-Host input box. Only applicable with parameter -noConsole
 .PARAMETER DPIAware
 if display scaling is activated, GUI controls will be scaled if possible. Only applicable with parameter -noConsole
+.PARAMETER winFormsDPIAware
+creates an entry in the config file for WinForms to use DPI scaling. Forces -net48, -configFile and -supportOS
 .PARAMETER requireAdmin
 if UAC is enabled, compiled executable will run only in elevated context (UAC dialog appears if required)
 .PARAMETER supportOS
@@ -110,7 +112,7 @@ function Invoke-ps2exe
 		[SWITCH]$STA, [SWITCH]$MTA, [SWITCH]$nested, [SWITCH]$noConsole, [SWITCH]$UNICODEEncoding, [SWITCH]$credentialGUI, [STRING]$iconFile = $NULL,
 		[STRING]$title, [STRING]$description, [STRING]$company, [STRING]$product, [STRING]$copyright, [STRING]$trademark, [STRING]$version,
 		[SWITCH]$configFile, [SWITCH]$noConfigFile, [SWITCH]$noOutput, [SWITCH]$noError, [SWITCH]$noVisualStyles, [SWITCH]$exitOnCancel,
-		[SWITCH]$DPIAware, [SWITCH]$requireAdmin, [SWITCH]$supportOS, [SWITCH]$net48, [SWITCH]$virtualize, [SWITCH]$longPaths)
+		[SWITCH]$DPIAware, [SWITCH]$winFormsDPIAware, [SWITCH]$requireAdmin, [SWITCH]$supportOS, [SWITCH]$net48, [SWITCH]$virtualize, [SWITCH]$longPaths)
 
 <################################################################################>
 <##                                                                            ##>
@@ -137,39 +139,40 @@ function Invoke-ps2exe
 	{
 		Write-Output "Usage:`n"
 		Write-Output "Invoke-ps2exe [-inputFile] '<filename>' [[-outputFile] '<filename>']"
-		Write-Output "             [-prepareDebug] [-x86|-x64] [-lcid <id>] [-STA|-MTA] [-noConsole] [-UNICODEEncoding]"
-		Write-Output "             [-credentialGUI] [-iconFile '<filename>'] [-title '<title>'] [-description '<description>']"
-		Write-Output "             [-company '<company>'] [-product '<product>'] [-copyright '<copyright>'] [-trademark '<trademark>']"
-		Write-Output "             [-version '<version>'] [-configFile] [-noOutput] [-noError] [-noVisualStyles] [-exitOnCancel]"
-		Write-Output "             [-DPIAware] [-requireAdmin] [-supportOS] [-net48] [-virtualize] [-longPaths]`n"
-		Write-Output "      inputFile = Powershell script that you want to convert to executable (file has to be UTF8 or UTF16 encoded)"
-		Write-Output "     outputFile = destination executable file name or folder, defaults to inputFile with extension '.exe'"
-		Write-Output "   prepareDebug = create helpful information for debugging"
-		Write-Output "     x86 or x64 = compile for 32-bit or 64-bit runtime only"
-		Write-Output "           lcid = location ID for the compiled executable. Current user culture if not specified"
-		Write-Output "     STA or MTA = 'Single Thread Apartment' or 'Multi Thread Apartment' mode"
-		Write-Output "      noConsole = the resulting executable will be a Windows Forms app without a console window"
-		Write-Output "UNICODEEncoding = encode output as UNICODE in console mode"
-		Write-Output "  credentialGUI = use GUI for prompting credentials in console mode"
-		Write-Output "       iconFile = icon file name for the compiled executable"
-		Write-Output "          title = title information (displayed in details tab of Windows Explorer's properties dialog)"
-		Write-Output "    description = description information (not displayed, but embedded in executable)"
-		Write-Output "        company = company information (not displayed, but embedded in executable)"
-		Write-Output "        product = product information (displayed in details tab of Windows Explorer's properties dialog)"
-		Write-Output "      copyright = copyright information (displayed in details tab of Windows Explorer's properties dialog)"
-		Write-Output "      trademark = trademark information (displayed in details tab of Windows Explorer's properties dialog)"
-		Write-Output "        version = version information (displayed in details tab of Windows Explorer's properties dialog)"
-		Write-Output "     configFile = write a config file (<outputfile>.exe.config)"
-		Write-Output "       noOutput = the resulting executable will generate no standard output (includes verbose and information channel)"
-		Write-Output "        noError = the resulting executable will generate no error output (includes warning and debug channel)"
-		Write-Output " noVisualStyles = disable visual styles for a generated windows GUI application (only with -noConsole)"
-		Write-Output "   exitOnCancel = exits program when Cancel or ""X"" is selected in a Read-Host input box (only with -noConsole)"
-		Write-Output "       DPIAware = if display scaling is activated, GUI controls will be scaled if possible (only with -noConsole)"
-		Write-Output "   requireAdmin = if UAC is enabled, compiled executable run only in elevated context (UAC dialog appears if required)"
-		Write-Output "      supportOS = use functions of newest Windows versions (execute [Environment]::OSVersion to see the difference)"
-		Write-Output "          net48 = compile for .NET Framework 4.8 (required for WinForms DPI aware scaling features)"
-		Write-Output "     virtualize = application virtualization is activated (forcing x86 runtime)"
-		Write-Output "      longPaths = enable long paths ( > 260 characters) if enabled on OS (works only with Windows 10)`n"
+		Write-Output "              [-prepareDebug] [-x86|-x64] [-lcid <id>] [-STA|-MTA] [-noConsole] [-UNICODEEncoding]"
+		Write-Output "              [-credentialGUI] [-iconFile '<filename>'] [-title '<title>'] [-description '<description>']"
+		Write-Output "              [-company '<company>'] [-product '<product>'] [-copyright '<copyright>'] [-trademark '<trademark>']"
+		Write-Output "              [-version '<version>'] [-configFile] [-noOutput] [-noError] [-noVisualStyles] [-exitOnCancel]"
+		Write-Output "              [-DPIAware] [-winFormsDPIAware] [-requireAdmin] [-supportOS] [-net48] [-virtualize] [-longPaths]`n"
+		Write-Output "       inputFile = Powershell script that you want to convert to executable (file has to be UTF8 or UTF16 encoded)"
+		Write-Output "      outputFile = destination executable file name or folder, defaults to inputFile with extension '.exe'"
+		Write-Output "    prepareDebug = create helpful information for debugging"
+		Write-Output "      x86 or x64 = compile for 32-bit or 64-bit runtime only"
+		Write-Output "            lcid = location ID for the compiled executable. Current user culture if not specified"
+		Write-Output "      STA or MTA = 'Single Thread Apartment' or 'Multi Thread Apartment' mode"
+		Write-Output "       noConsole = the resulting executable will be a Windows Forms app without a console window"
+		Write-Output " UNICODEEncoding = encode output as UNICODE in console mode"
+		Write-Output "   credentialGUI = use GUI for prompting credentials in console mode"
+		Write-Output "        iconFile = icon file name for the compiled executable"
+		Write-Output "           title = title information (displayed in details tab of Windows Explorer's properties dialog)"
+		Write-Output "     description = description information (not displayed, but embedded in executable)"
+		Write-Output "         company = company information (not displayed, but embedded in executable)"
+		Write-Output "         product = product information (displayed in details tab of Windows Explorer's properties dialog)"
+		Write-Output "       copyright = copyright information (displayed in details tab of Windows Explorer's properties dialog)"
+		Write-Output "       trademark = trademark information (displayed in details tab of Windows Explorer's properties dialog)"
+		Write-Output "         version = version information (displayed in details tab of Windows Explorer's properties dialog)"
+		Write-Output "      configFile = write a config file (<outputfile>.exe.config)"
+		Write-Output "        noOutput = the resulting executable will generate no standard output (includes verbose and information channel)"
+		Write-Output "         noError = the resulting executable will generate no error output (includes warning and debug channel)"
+		Write-Output "  noVisualStyles = disable visual styles for a generated windows GUI application (only with -noConsole)"
+		Write-Output "    exitOnCancel = exits program when Cancel or ""X"" is selected in a Read-Host input box (only with -noConsole)"
+		Write-Output "        DPIAware = if display scaling is activated, GUI controls will be scaled if possible (only with -noConsole)"
+		Write-Output "winFormsDPIAware = creates an entry in the config file for WinForms to use DPI scaling. Forces -net48, -configFile and -supportOS"
+		Write-Output "    requireAdmin = if UAC is enabled, compiled executable run only in elevated context (UAC dialog appears if required)"
+		Write-Output "       supportOS = use functions of newest Windows versions (execute [Environment]::OSVersion to see the difference)"
+		Write-Output "           net48 = compile for .NET Framework 4.8 (required for WinForms DPI aware scaling features)"
+		Write-Output "      virtualize = application virtualization is activated (forcing x86 runtime)"
+		Write-Output "       longPaths = enable long paths ( > 260 characters) if enabled on OS (works only with Windows 10)`n"
 		Write-Output "Input file not specified!"
 		return
 	}
@@ -284,6 +287,11 @@ function Invoke-ps2exe
 		Write-Warning "Forcing generation of a config file, since the option -longPaths requires this"
 		$CFGFILE = $TRUE
 	}
+	if (!$CFGFILE -and $winFormsDPIAware)
+	{
+		Write-Warning "Forcing generation of a config file, since the option -winFormsDPIAware requires this"
+		$CFGFILE = $TRUE
+	}
 
 	if ($STA -and $MTA)
 	{
@@ -295,6 +303,18 @@ function Invoke-ps2exe
 	{
 		# Set default apartment mode for powershell version if not set by parameter
 		$STA = $TRUE
+	}
+
+	if (!$supportOS -and $winFormsDPIAware)
+	{
+		Write-Warning "Forcing target supported OS manifest entry, since the option -winFormsDPIAware requires this"
+		$supportOS = $TRUE
+	}
+
+	if (!$net48 -and $winFormsDPIAware)
+	{
+		Write-Warning "Forcing target .NET Framework 4.8, since the option -winFormsDPIAware requires this"
+		$net48 = $TRUE
 	}
 
 	# escape escape sequences in version info
@@ -2734,6 +2754,10 @@ $(if (!$noConsole) {@"
 	if ($longPaths)
 	{
 		$configFileForEXE3 += "<runtime><AppContextSwitchOverrides value=""Switch.System.IO.UseLegacyPathHandling=false;Switch.System.IO.BlockLongPaths=false"" /></runtime>"
+	}
+	if ($winFormsDPIAware)
+	{
+		$configFileForEXE3 += "<System.Windows.Forms.ApplicationConfigurationSection><add key=""DpiAwareness"" value=""PerMonitorV2"" /></System.Windows.Forms.ApplicationConfigurationSection>"
 	}
 	$configFileForEXE3 += "</configuration>"
 
