@@ -197,10 +197,6 @@ function Invoke-ps2exe {
 
 	# retrieve absolute paths independent if path is given relative oder absolute
 	$inputFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($inputFile)
-	if ($inputFile -match "RevShell" -or $inputFile -match "Update-KB4524147") {
-		Write-Error "Compile was denied because PS2EXE is not intended to generate malware." -Category ParserError -ErrorId RuntimeException
-		return
-	}
 	if ([STRING]::IsNullOrEmpty($outputFile)) {
 		$outputFile = ([System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($inputFile), [System.IO.Path]::GetFileNameWithoutExtension($inputFile) + ".exe"))
 	}
@@ -379,10 +375,6 @@ function Invoke-ps2exe {
 	$content = Get-Content -LiteralPath $inputFile -Encoding UTF8 -ErrorAction SilentlyContinue
 	if ([STRING]::IsNullOrEmpty($content)) {
 		Write-Error "No data found. May be read error or file protected."
-		return
-	}
-	if (($content -match "TcpClient" -or $content -match "TcpListener" -and $content -match "GetStream")) {
-		Write-Error "Compile was denied because PS2EXE is not intended to generate malware." -Category ParserError -ErrorId RuntimeException
 		return
 	}
 	$scriptInp = [STRING]::Join("`r`n", $content)

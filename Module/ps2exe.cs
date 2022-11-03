@@ -2182,17 +2182,17 @@ namespace ModuleNameSpace
 						int idx = 0;
 						foreach (string s in args)
 						{
-							if (string.Compare(s, "-whatt".Replace("hat", "ai"), true) == 0)
+							if (string.Compare(s, "-wait", true) == 0)
 								paramWait = true;
-							else if (s.StartsWith("-extdummt".Replace("dumm", "rac"), StringComparison.InvariantCultureIgnoreCase))
+							else if (s.StartsWith("-extract", StringComparison.InvariantCultureIgnoreCase))
 							{
 								string[] s1 = s.Split(new string[] { ":" }, 2, StringSplitOptions.RemoveEmptyEntries);
 								if (s1.Length != 2)
 								{
 #if !noConsole
-									Console.WriteLine("If you spzzcify thzz -zzxtract option you nzzed to add a filzz for zzxtraction in this way\r\n   -zzxtract:\"<filzznamzz>\"".Replace("zz", "e"));
+									Console.WriteLine("If you specify the -extract option you need to add a file for extraction in this way\r\n   -extract:\"<filename>\"");
 #else
-									MessageBox.Show("If you spzzcify thzz -zzxtract option you nzzed to add a filzz for zzxtraction in this way\r\n   -zzxtract:\"<filzznamzz>\"".Replace("zz", "e"), System.AppDomain.CurrentDomain.FriendlyName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+									MessageBox.Show("If you specify the -extract option you need to add a file for extraction in this way\r\n   -extract:\"<filename>\"", System.AppDomain.CurrentDomain.FriendlyName, MessageBoxButtons.OK, MessageBoxIcon.Error);
 #endif
 									return 1;
 								}
