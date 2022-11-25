@@ -141,7 +141,7 @@ function Invoke-ps2exe
 		Write-Output "              [-credentialGUI] [-iconFile '<filename>'] [-title '<title>'] [-description '<description>']"
 		Write-Output "              [-company '<company>'] [-product '<product>'] [-copyright '<copyright>'] [-trademark '<trademark>']"
 		Write-Output "              [-version '<version>'] [-configFile] [-noOutput] [-noError] [-noVisualStyles] [-exitOnCancel]"
-		Write-Output "              [-DPIAware] [-requireAdmin] [-supportOS] [-virtualize] [-longPaths]`n"
+		Write-Output "              [-DPIAware] [-winFormsDPIAware] [-requireAdmin] [-supportOS] [-virtualize] [-longPaths]`n"
 		Write-Output "       inputFile = Powershell script that you want to convert to executable (file has to be UTF8 or UTF16 encoded)"
 		Write-Output "      outputFile = destination executable file name or folder, defaults to inputFile with extension '.exe'"
 		Write-Output "    prepareDebug = create helpful information for debugging"
