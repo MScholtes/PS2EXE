@@ -1,11 +1,6 @@
-# Attention: Incorrect virus detection
-**Some (really) stupid idiots seem to have abused PS2EXE to compile their computer virus scripts. As a result, a rapidly growing number of virus scanners recognize programs created with PS2EXE as malicious programs and delete them.**
+**If your compiled script is mistakenly detected as malware, the best way to prevent this is to certify the executable.
 
-**There is only one hope to save the PS2EXE project: Please send your (harmless) programs created with PS2EXE via the web forms from the virus scanners' vendors for reporting false positives (I've already done it with some of them, please use only the false positive page)!**
-
-**If this is not successful, then I will have to quit PS2EXE as nobody can use it anymore.**
-
-**Thank you for your support**
+**Please do not use PS2EXE to create harmful programs!
 
 # PS2EXE
 Overworking of the great script of Ingo Karstein with GUI support. The GUI output and input is activated with one switch, real windows executables are generated. With Powershell 5.x support and graphical front end.
@@ -16,9 +11,9 @@ You find the script based version here (https://github.com/MScholtes/TechNet-Gal
 
 Author: Markus Scholtes
 
-Version: 1.0.11
+Version: 1.0.12
 
-Date: 2021-11-21
+Date: 2021-12-25
 
 ## Installation
 
@@ -146,6 +141,9 @@ $Host.UI.RawUI.FlushInputBuffer()
 ```
 
 ## Changes:
+### 1.0.12 / 2022-11-22
+- new parameter -winFormsDPIAware to support scaling for WinForms in noConsole mode (only Windows 10 or up)
+
 ### 1.0.11 / 2021-11-21
 - fixed password longer than 24 characters error
 - new parameter -DPIAware to support scaling in noConsole mode
