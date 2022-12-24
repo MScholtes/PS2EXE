@@ -92,6 +92,19 @@ A generated executable has the following reserved parameters:
 
 ## Remarks
 
+### Use of Powershell Core:
+Because *Powershell Core* does not have a compiler, *PS2EXE* cannot be run natively there. In order to still have *PS2EXE* available there, the following procedure must be carried out. 
+
+- Start *Windows Powershell* (for example with *Powershell.exe*) and install the module *PS2EXE*, for example with
+```powershell
+Install-Module ps2exe -Scope AllUsers
+```
+(this step has to be executed only once)
+- Now you can import the module in *Powershell Core* with
+```powershell
+Import-Module ps2exe -UseWindowsPowerShell
+```
+
 ### List of cmdlets not implemented:
 The basic input/output commands had to be rewritten in C# for PS2EXE. Not implemented are *Write-Progress* in console mode (too much work) and *Start-Transcript*/*Stop-Transcript* (no proper reference implementation by Microsoft).
 
