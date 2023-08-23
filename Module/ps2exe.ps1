@@ -429,8 +429,7 @@ function Invoke-ps2exe
 		Write-Error "PS2EXE did not compile this because PS2EXE does not like malware." -Category ParserError -ErrorId RuntimeException
 		return
 	}
-	$scriptInp = [STRING]::Join("`r`n", $content)
-	$script = [System.Convert]::ToBase64String(([System.Text.Encoding]::UTF8.GetBytes($scriptInp)))
+	[void]$cp.EmbeddedResources.Add($inputFile);
 
 	$culture = ""
 
@@ -2622,15 +2621,22 @@ $(if (!$noConsole) {@"
 							idx++;
 						}
 
-						string script = System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(@"$($script)"));
-
-						if (!string.IsNullOrEmpty(extractFN))
+						Assembly executingAssembly = Assembly.GetExecutingAssembly();
+						using (System.IO.Stream stream = executingAssembly.GetManifestResourceStream(@"$([System.IO.Path]::GetFileName($inputFile))"))
 						{
-							System.IO.File.WriteAllText(extractFN, script);
-							return 0;
-						}
+							using (System.IO.StreamReader reader = new System.IO.StreamReader(stream))
+							{
+								string script = reader.ReadToEnd();
 
-						pwsh.AddScript(script);
+								if (!string.IsNullOrEmpty(extractFN))
+								{
+									System.IO.File.WriteAllText(extractFN, script);
+									return 0;
+								}
+
+								pwsh.AddScript(script);
+							}
+						}
 
 						// parse parameters
 						string argbuffer = null;
