@@ -29,7 +29,7 @@ Start **Win-PS2EXE** by typing Win-PS2EXE in a powershell console and fill in th
 Click **Compile**, a powershell window opens and your powershell script will be compiled to an executable.
 
 ### Changes:
-1.0.1.2: nex text field for additional parameters
+1.0.1.2: new text field for additional parameters
 
 1.0.1.1: target folder dialog added (code by Josip Medved, https://www.medo64.com/2011/12/openfolderdialog/)
 
