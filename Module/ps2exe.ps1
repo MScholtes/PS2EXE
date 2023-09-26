@@ -95,8 +95,8 @@ Compiles C:\Data\MyScript.ps1 to C:\Data\MyScriptGUI.exe as graphical executable
 Win-PS2EXE
 Start graphical front end to Invoke-ps2exe
 .NOTES
-Version: 0.5.0.28
-Date: 2022-11-09
+Version: 0.5.0.29
+Date: 2023-09-23
 Author: Ingo Karstein, Markus Scholtes
 .LINK
 https://www.powershellgallery.com/packages/ps2exe
@@ -114,7 +114,7 @@ function Invoke-ps2exe
 
 <################################################################################>
 <##                                                                            ##>
-<##      PS2EXE-GUI v0.5.0.28                                                  ##>
+<##      PS2EXE-GUI v0.5.0.29                                                  ##>
 <##      Written by: Ingo Karstein (http://blog.karstein-consulting.com)       ##>
 <##      Reworked and GUI support by Markus Scholtes                           ##>
 <##                                                                            ##>
@@ -126,7 +126,7 @@ function Invoke-ps2exe
 
 	if (!$nested)
 	{
-		Write-Output "PS2EXE-GUI v0.5.0.28 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
+		Write-Output "PS2EXE-GUI v0.5.0.29 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
 	}
 	else
 	{
@@ -218,13 +218,13 @@ function Invoke-ps2exe
 	else
 	{
 		$outputFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($outputFile)
-		if ((Test-Path $outputFile -PathType Container))
+		if ((Test-Path -LiteralPath $OutputFile -PathType Container))
 		{
 			$outputFile = ([System.IO.Path]::Combine($outputFile, [System.IO.Path]::GetFileNameWithoutExtension($inputFile)+".exe"))
 		}
 	}
 
-	if (!(Test-Path $inputFile -PathType Leaf))
+	if (!(Test-Path -LiteralPath $inputFile -PathType Leaf))
 	{
 		Write-Error "Input file $($inputfile) not found!"
 		return
@@ -247,7 +247,7 @@ function Invoke-ps2exe
 		# retrieve absolute path independent if path is given relative oder absolute
 		$iconFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($iconFile)
 
-		if (!(Test-Path $iconFile -PathType Leaf))
+		if (!(Test-Path -LiteralPath $iconFile -PathType Leaf))
 		{
 			Write-Error "Icon file $($iconFile) not found!"
 			return
@@ -418,19 +418,7 @@ function Invoke-ps2exe
 	}
 
 	Write-Output "Reading input file $inputFile"
-	$content = Get-Content -LiteralPath $inputFile -Encoding UTF8 -ErrorAction SilentlyContinue
-	if ([STRING]::IsNullOrEmpty($content))
-	{
-		Write-Error "No data found. May be read error or file protected."
-		return
-	}
-	if (($content -match ("Tnv2fent" -replace "nv2f", "cpCli") -or ($content -match ("TcdT2m7ner" -replace "dT2m7", "pListe")) -and ($content -match ("Ge8lM2am" -replace "8lM2", "tStre"))))
-	{
-		Write-Error "PS2EXE did not compile this because PS2EXE does not like malware." -Category ParserError -ErrorId RuntimeException
-		return
-	}
-	$scriptInp = [STRING]::Join("`r`n", $content)
-	$script = [System.Convert]::ToBase64String(([System.Text.Encoding]::UTF8.GetBytes($scriptInp)))
+	[VOID]$cp.EmbeddedResources.Add($inputFile)
 
 	$culture = ""
 
@@ -2467,7 +2455,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 		{
 			get
 			{
-				return new Version(0, 5, 0, 28);
+				return new Version(0, 5, 0, 29);
 			}
 		}
 
@@ -2547,14 +2535,14 @@ $(if (!$noConsole -and $UNICODEEncoding) {@"
 					$(if ($STA -or $MTA) {"myRunSpace.ApartmentState = System.Threading.ApartmentState."})$(if ($STA){"STA"})$(if ($MTA){"MTA"});
 					myRunSpace.Open();
 
-					using (PowerShell pwsh = PowerShell.Create())
+					using (PowerShell posh = PowerShell.Create())
 					{
 $(if (!$noConsole) {@"
 						Console.CancelKeyPress += new ConsoleCancelEventHandler(delegate(object sender, ConsoleCancelEventArgs e)
 						{
 							try
 							{
-								pwsh.BeginStop(new AsyncCallback(delegate(IAsyncResult r)
+								posh.BeginStop(new AsyncCallback(delegate(IAsyncResult r)
 								{
 									mre.Set();
 									e.Cancel = true;
@@ -2566,10 +2554,10 @@ $(if (!$noConsole) {@"
 						});
 "@ })
 
-						pwsh.Runspace = myRunSpace;
-						pwsh.Streams.Error.DataAdded += new EventHandler<DataAddedEventArgs>(delegate(object sender, DataAddedEventArgs e)
+						posh.Runspace = myRunSpace;
+						posh.Streams.Error.DataAdded += new EventHandler<DataAddedEventArgs>(delegate(object sender, DataAddedEventArgs e)
 						{
-							ui.WriteErrorLine(((PSDataCollection<ErrorRecord>)sender)[e.Index].ToString());
+							ui.WriteErrorLine(((PSDataCollection<ErrorRecord>)sender)[e.Index].Exception.Message);
 						});
 
 						PSDataCollection<string> colInput = new PSDataCollection<string>();
@@ -2586,24 +2574,24 @@ $(if (!$noConsole) {@"
 						PSDataCollection<PSObject> colOutput = new PSDataCollection<PSObject>();
 						colOutput.DataAdded += new EventHandler<DataAddedEventArgs>(delegate(object sender, DataAddedEventArgs e)
 						{
-							ui.WriteLine(colOutput[e.Index].ToString());
+							ui.WriteLine(((PSDataCollection<PSObject>)sender)[e.Index].ToString());
 						});
 
 						int separator = 0;
 						int idx = 0;
 						foreach (string s in args)
 						{
-							if (string.Compare(s, "-wrant".Replace("ran", "ai"), true) == 0)
+							if (string.Compare(s, "-wait", true) == 0)
 								paramWait = true;
-							else if (s.StartsWith("-extdimmt".Replace("dimm", "rac"), StringComparison.InvariantCultureIgnoreCase))
+							else if (s.StartsWith("-extract", StringComparison.InvariantCultureIgnoreCase))
 							{
 								string[] s1 = s.Split(new string[] { ":" }, 2, StringSplitOptions.RemoveEmptyEntries);
 								if (s1.Length != 2)
 								{
 $(if (!$noConsole) {@"
-									Console.WriteLine("If you spqqcify thqq -qqxtract option you nqqed to add a filqq for qqxtraction in this way\r\n   -qqxtract:\"<filqqnamqq>\"".Replace("qq", "e"));
+									Console.WriteLine("If you specify the -extract option you need to add a file for extraction in this way\r\n   -extract:\"<filename>\"");
 "@ } else {@"
-									MessageBox.Show("If you spqqcify thqq -qqxtract option you nqqed to add a filqq for qqxtraction in this way\r\n   -qqxtract:\"<filqqnamqq>\"".Replace("qq", "e"), System.AppDomain.CurrentDomain.FriendlyName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+									MessageBox.Show("If you specify the -extract option you need to add a file for extraction in this way\r\n   -extract:\"<filename>\"", System.AppDomain.CurrentDomain.FriendlyName, MessageBoxButtons.OK, MessageBoxIcon.Error);
 "@ })
 									return 1;
 								}
@@ -2622,15 +2610,22 @@ $(if (!$noConsole) {@"
 							idx++;
 						}
 
-						string script = System.Text.Encoding.UTF8.GetString(System.Convert.FromBase64String(@"$($script)"));
-
-						if (!string.IsNullOrEmpty(extractFN))
+						Assembly executingAssembly = Assembly.GetExecutingAssembly();
+						using (System.IO.Stream scriptstream = executingAssembly.GetManifestResourceStream("$([System.IO.Path]::GetFileName($inputFile))"))
 						{
-							System.IO.File.WriteAllText(extractFN, script);
-							return 0;
-						}
+							using (System.IO.StreamReader scriptreader = new System.IO.StreamReader(scriptstream, System.Text.Encoding.UTF8))
+							{
+								string script = scriptreader.ReadToEnd();
 
-						pwsh.AddScript(script);
+								if (!string.IsNullOrEmpty(extractFN))
+								{
+									System.IO.File.WriteAllText(extractFN, script);
+									return 0;
+								}
+
+								posh.AddScript(script);
+							}
+						}
 
 						// parse parameters
 						string argbuffer = null;
@@ -2645,7 +2640,7 @@ $(if (!$noConsole) {@"
 							if ((match.Success && match.Groups.Count == 3) && (!Double.TryParse(args[i], out dummy)))
 							{ // parameter in powershell style, means named parameter found
 								if (argbuffer != null) // already a named parameter in buffer, then flush it
-									pwsh.AddParameter(argbuffer);
+									posh.AddParameter(argbuffer);
 
 								if (match.Groups[2].Value.Trim() == "")
 								{ // store named parameter in buffer
@@ -2655,19 +2650,19 @@ $(if (!$noConsole) {@"
 									// caution: when called in powershell $TRUE gets converted, when called in cmd.exe not
 									if ((match.Groups[2].Value == "$TRUE") || (match.Groups[2].Value.ToUpper() == "\x24TRUE"))
 									{ // switch found
-										pwsh.AddParameter(match.Groups[1].Value, true);
+										posh.AddParameter(match.Groups[1].Value, true);
 										argbuffer = null;
 									}
 									else
 										// caution: when called in powershell $FALSE gets converted, when called in cmd.exe not
 										if ((match.Groups[2].Value == "$FALSE") || (match.Groups[2].Value.ToUpper() == "\x24"+"FALSE"))
 										{ // switch found
-											pwsh.AddParameter(match.Groups[1].Value, false);
+											posh.AddParameter(match.Groups[1].Value, false);
 											argbuffer = null;
 										}
 										else
 										{ // named parameter with value found
-											pwsh.AddParameter(match.Groups[1].Value, match.Groups[2].Value);
+											posh.AddParameter(match.Groups[1].Value, match.Groups[2].Value);
 											argbuffer = null;
 										}
 							}
@@ -2675,24 +2670,24 @@ $(if (!$noConsole) {@"
 							{ // unnamed parameter found
 								if (argbuffer != null)
 								{ // already a named parameter in buffer, so this is the value
-									pwsh.AddParameter(argbuffer, args[i]);
+									posh.AddParameter(argbuffer, args[i]);
 									argbuffer = null;
 								}
 								else
 								{ // position parameter found
-									pwsh.AddArgument(args[i]);
+									posh.AddArgument(args[i]);
 								}
 							}
 						}
 
-						if (argbuffer != null) pwsh.AddParameter(argbuffer); // flush parameter buffer...
+						if (argbuffer != null) posh.AddParameter(argbuffer); // flush parameter buffer...
 
 						// convert output to strings
-						pwsh.AddCommand("out-string");
+						posh.AddCommand("Out-String");
 						// with a single string per line
-						pwsh.AddParameter("stream");
+						posh.AddParameter("Stream");
 
-						pwsh.BeginInvoke<string, PSObject>(colInput, colOutput, null, new AsyncCallback(delegate(IAsyncResult ar)
+						posh.BeginInvoke<string, PSObject>(colInput, colOutput, null, new AsyncCallback(delegate(IAsyncResult ar)
 						{
 							if (ar.IsCompleted)
 								mre.Set();
@@ -2701,10 +2696,10 @@ $(if (!$noConsole) {@"
 						while (!me.ShouldExit && !mre.WaitOne(100))
 						{ };
 
-						pwsh.Stop();
+						posh.Stop();
 
-						if (pwsh.InvocationStateInfo.State == PSInvocationState.Failed)
-							ui.WriteErrorLine(pwsh.InvocationStateInfo.Reason.Message);
+						if (posh.InvocationStateInfo.State == PSInvocationState.Failed)
+							ui.WriteErrorLine(posh.InvocationStateInfo.Reason.Message);
 					}
 
 					myRunSpace.Close();
@@ -2762,16 +2757,16 @@ $(if (!$noConsole) {@"
 	$cr = $cop.CompileAssemblyFromSource($cp, $programFrame)
 	if ($cr.Errors.Count -gt 0)
 	{
-		if (Test-Path $outputFile)
+		if (Test-Path -LiteralPath $outputFile)
 		{
-			Remove-Item $outputFile -Verbose:$FALSE
+			Remove-Item -LiteralPath $outputFile -Verbose:$FALSE
 		}
 		Write-Error -ErrorAction Continue "Could not create the PowerShell .exe file because of compilation errors. Use -verbose parameter to see details."
 		$cr.Errors | ForEach-Object { Write-Verbose $_ }
 	}
 	else
 	{
-		if (Test-Path $outputFile)
+		if (Test-Path -LiteralPath $outputFile)
 		{
 			Write-Output "Output file $outputFile written"
 
@@ -2797,9 +2792,9 @@ $(if (!$noConsole) {@"
 	}
 
 	if ($requireAdmin -or $DPIAware -or $supportOS -or $longPaths)
-	{ if (Test-Path $($outputFile+".win32manifest"))
+	{ if (Test-Path -LiteralPath $($outputFile+".win32manifest"))
 		{
-			Remove-Item $($outputFile+".win32manifest") -Verbose:$FALSE
+			Remove-Item -LiteralPath $($outputFile+".win32manifest") -Verbose:$FALSE
 		}
 	}
 }
