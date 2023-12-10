@@ -105,6 +105,8 @@ Never store passwords in your compiled script! One can simply decompile the scri
 Output.exe -extract:C:\Output.ps1
 ```
 will decompile the script stored in Output.exe.
+Even if you use the `NoSepcialArgsHandling` parameter, the entire script is explicitly visible to the .net decompiler.
+So never store passwords in your scripts!
 
 ### Script variables:
 Since PS2EXE converts a script to an executable, script related variables are not available anymore. Especially the variable $PSScriptRoot is empty.
