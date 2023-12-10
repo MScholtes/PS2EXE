@@ -1134,7 +1134,17 @@ $(if ($noConsole){ @"
 			foreach (ChoiceDescription sAuswahl in arrChoice)
 			{
 				aradioButton[Counter] = new RadioButton();
-				aradioButton[Counter].Text = sAuswahl.Label;
+				string ltext = sAuswahl.Label;
+				// back space (\b) handling
+				while (ltext.IndexOf('\b') > -1)
+				{
+					int pos = ltext.IndexOf('\b');
+					if (pos > 0)
+						ltext = ltext.Substring(0, pos - 1) + ltext.Substring(pos + 1);
+					else
+						ltext = ltext.Substring(1);
+				}
+				aradioButton[Counter].Text = ltext;
 				if (Counter == intDefault)
 					aradioButton[Counter].Checked = true;
 				aradioButton[Counter].Location = new Point(9, iPosY);
