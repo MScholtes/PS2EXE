@@ -578,6 +578,18 @@ $(if ($noConsole){ @"
 		// Speicher für Konsolenfarben bei GUI-Output werden gelesen und gesetzt, aber im Moment nicht genutzt (for future use)
 		private ConsoleColor GUIBackgroundColor = ConsoleColor.White;
 		private ConsoleColor GUIForegroundColor = ConsoleColor.Black;
+		
+$(if ($noConsole){ @"
+		private string _windowTitleData = null;
+		public PSEXERawUI() {
+			// load assembly:AssemblyTitle
+			AssemblyTitleAttribute titleAttribute = (AssemblyTitleAttribute)Attribute.GetCustomAttribute(Assembly.GetExecutingAssembly(), typeof(AssemblyTitleAttribute));
+			if (titleAttribute != null)
+				_windowTitleData = titleAttribute.Title;
+			else
+				_windowTitleData = System.AppDomain.CurrentDomain.FriendlyName;
+		}
+"@ })
 "@ } else {@"
 		const int STD_OUTPUT_HANDLE = -11;
 
@@ -993,13 +1005,15 @@ $(if (!$noConsole){ @"
 $(if (!$noConsole){ @"
 				return Console.Title;
 "@ } else {@"
-				return System.AppDomain.CurrentDomain.FriendlyName;
+				return _windowTitleData;
 "@ })
 			}
 			set
 			{
 $(if (!$noConsole){ @"
 				Console.Title = value;
+"@ } else {@"
+				_windowTitleData = value;
 "@ })
 			}
 		}
@@ -1753,7 +1767,7 @@ $(if (!$noVisualStyles) {@"
 
 	internal class MainModuleUI : PSHostUserInterface
 	{
-		private MainModuleRawUI rawUI = null;
+		public MainModuleRawUI rawUI = null;
 
 		public ConsoleColor ErrorForegroundColor = ConsoleColor.Red;
 		public ConsoleColor ErrorBackgroundColor = ConsoleColor.Black;
@@ -1790,7 +1804,7 @@ $(if (!$noConsole) {@"
 			if (!string.IsNullOrEmpty(message)) WriteLine(message);
 "@ } else {@"
 			if ((!string.IsNullOrEmpty(caption)) || (!string.IsNullOrEmpty(message)))
-			{ string sTitel = System.AppDomain.CurrentDomain.FriendlyName, sMeldung = "";
+			{ string sTitel = rawUI.WindowTitle, sMeldung = "";
 
 				if (!string.IsNullOrEmpty(caption)) sTitel = caption;
 				if (!string.IsNullOrEmpty(message)) sMeldung = message;
@@ -2167,7 +2181,7 @@ $(if (!$noOutput) { if (!$noConsole) {@"
 			Console.BackgroundColor = bgc;
 "@ } else {@"
 			if ((!string.IsNullOrEmpty(value)) && (value != "\n"))
-				MessageBox.Show(value, System.AppDomain.CurrentDomain.FriendlyName);
+				MessageBox.Show(value, rawUI.WindowTitle);
 "@ } })
 		}
 
@@ -2177,7 +2191,7 @@ $(if (!$noOutput) { if (!$noConsole) {@"
 			Console.Write(value);
 "@ } else {@"
 			if ((!string.IsNullOrEmpty(value)) && (value != "\n"))
-				MessageBox.Show(value, System.AppDomain.CurrentDomain.FriendlyName);
+				MessageBox.Show(value, rawUI.WindowTitle);
 "@ } })
 		}
 
@@ -2187,7 +2201,7 @@ $(if (!$noOutput) { if (!$noConsole) {@"
 $(if (!$noError) { if (!$noConsole) {@"
 			WriteLineInternal(DebugForegroundColor, DebugBackgroundColor, string.Format("DEBUG: {0}", message));
 "@ } else {@"
-			MessageBox.Show(message, System.AppDomain.CurrentDomain.FriendlyName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+			MessageBox.Show(message, rawUI.WindowTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
 "@ } })
 		}
 
@@ -2200,7 +2214,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 			else
 				WriteLineInternal(ErrorForegroundColor, ErrorBackgroundColor, string.Format("ERROR: {0}", value));
 "@ } else {@"
-			MessageBox.Show(value, System.AppDomain.CurrentDomain.FriendlyName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+			MessageBox.Show(value, rawUI.WindowTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
 "@ } })
 		}
 
@@ -2209,7 +2223,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 $(if (!$noOutput) { if (!$noConsole) {@"
 			Console.WriteLine();
 "@ } else {@"
-			MessageBox.Show("", System.AppDomain.CurrentDomain.FriendlyName);
+			MessageBox.Show("", rawUI.WindowTitle);
 "@ } })
 		}
 
@@ -2224,7 +2238,7 @@ $(if (!$noOutput) { if (!$noConsole) {@"
 			Console.BackgroundColor = bgc;
 "@ } else {@"
 			if ((!string.IsNullOrEmpty(value)) && (value != "\n"))
-				MessageBox.Show(value, System.AppDomain.CurrentDomain.FriendlyName);
+				MessageBox.Show(value, rawUI.WindowTitle);
 "@ } })
 		}
 
@@ -2247,7 +2261,7 @@ $(if (!$noOutput) { if (!$noConsole) {@"
 			Console.WriteLine(value);
 "@ } else {@"
 			if ((!string.IsNullOrEmpty(value)) && (value != "\n"))
-				MessageBox.Show(value, System.AppDomain.CurrentDomain.FriendlyName);
+				MessageBox.Show(value, rawUI.WindowTitle);
 "@ } })
 		}
 
@@ -2277,7 +2291,7 @@ $(if ($noConsole) {@"
 $(if (!$noOutput) { if (!$noConsole) {@"
 			WriteLine(VerboseForegroundColor, VerboseBackgroundColor, string.Format("VERBOSE: {0}", message));
 "@ } else {@"
-			MessageBox.Show(message, System.AppDomain.CurrentDomain.FriendlyName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+			MessageBox.Show(message, rawUI.WindowTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
 "@ } })
 		}
 
@@ -2287,7 +2301,7 @@ $(if (!$noOutput) { if (!$noConsole) {@"
 $(if (!$noError) { if (!$noConsole) {@"
 			WriteLineInternal(WarningForegroundColor, WarningBackgroundColor, string.Format("WARNING: {0}", message));
 "@ } else {@"
-			MessageBox.Show(message, System.AppDomain.CurrentDomain.FriendlyName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+			MessageBox.Show(message, rawUI.WindowTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
 "@ } })
 		}
 	}
@@ -2711,7 +2725,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 				Console.Write("An exception occured: ");
 				Console.WriteLine(ex.Message);
 "@ } else {@"
-				MessageBox.Show("An exception occured: " + ex.Message, System.AppDomain.CurrentDomain.FriendlyName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show("An exception occured: " + ex.Message, ui.rawUI.WindowTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
 "@ } })
 			}
 
