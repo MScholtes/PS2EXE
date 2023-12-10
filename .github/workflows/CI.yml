@@ -3,8 +3,7 @@ name: CI
 on:
   push:
     paths:
-      - 'src/**'
-      - 'opt/**'
+      - 'Module/**'
   pull_request:
     branches: [ "master" ]
   workflow_dispatch:
