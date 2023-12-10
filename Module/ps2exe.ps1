@@ -2798,3 +2798,8 @@ $(if (!$noConsole) {@"
 		}
 	}
 }
+
+# if this file is called directly, execute the function
+if ($args) {
+	Invoke-ps2exe @args
+}
