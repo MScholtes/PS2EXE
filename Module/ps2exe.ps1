@@ -25,6 +25,8 @@ Powershell script to convert to executable (file has to be UTF8 or UTF16 encoded
 destination executable file name or folder, defaults to inputFile with extension '.exe'
 .PARAMETER prepareDebug
 create helpful information for debugging of generated executable. See parameter -debug there
+.PARAMETER NoSepcialArgsHandling
+do not handle special arguments -debug, -extract, -wait and -end. They will be passed to the script inside the executable
 .PARAMETER x86
 compile for 32-bit runtime only
 .PARAMETER x64
@@ -106,7 +108,7 @@ https://github.com/MScholtes/PS2EXE
 function Invoke-ps2exe
 {
 	[CmdletBinding()]
-	Param([STRING]$inputFile = $NULL, [STRING]$outputFile = $NULL, [SWITCH]$prepareDebug, [SWITCH]$x86, [SWITCH]$x64, [int]$lcid,
+	Param([STRING]$inputFile = $NULL, [STRING]$outputFile = $NULL, [SWITCH]$prepareDebug, [SWITCH]$NoSepcialArgsHandling, [SWITCH]$x86, [SWITCH]$x64, [int]$lcid,
 		[SWITCH]$STA, [SWITCH]$MTA, [SWITCH]$nested, [SWITCH]$noConsole, [SWITCH]$UNICODEEncoding, [SWITCH]$credentialGUI, [STRING]$iconFile = $NULL,
 		[STRING]$title, [STRING]$description, [STRING]$company, [STRING]$product, [STRING]$copyright, [STRING]$trademark, [STRING]$version,
 		[SWITCH]$configFile, [SWITCH]$noConfigFile, [SWITCH]$noOutput, [SWITCH]$noError, [SWITCH]$noVisualStyles, [SWITCH]$exitOnCancel,
@@ -145,6 +147,7 @@ function Invoke-ps2exe
 		Write-Output "       inputFile = Powershell script that you want to convert to executable (file has to be UTF8 or UTF16 encoded)"
 		Write-Output "      outputFile = destination executable file name or folder, defaults to inputFile with extension '.exe'"
 		Write-Output "    prepareDebug = create helpful information for debugging"
+		Write-Output "NoSepcialArgsHandling = do not handle special arguments -debug, -extract, -wait and -end"
 		Write-Output "      x86 or x64 = compile for 32-bit or 64-bit runtime only"
 		Write-Output "            lcid = location ID for the compiled executable. Current user culture if not specified"
 		Write-Output "      STA or MTA = 'Single Thread Apartment' or 'Multi Thread Apartment' mode"
@@ -2519,8 +2522,10 @@ $(if (!$noConsole -and $UNICODEEncoding) {@"
 			$(if (!$noVisualStyles -and $noConsole) { "Application.EnableVisualStyles();" })
 			MainApp me = new MainApp();
 
+$(if (!$NoSepcialArgsHandling) {@"
 			bool paramWait = false;
 			string extractFN = string.Empty;
+"@ })
 
 			MainModuleUI ui = new MainModuleUI();
 			MainModule host = new MainModule(me, ui);
@@ -2577,6 +2582,7 @@ $(if (!$noConsole) {@"
 							ui.WriteLine(((PSDataCollection<PSObject>)sender)[e.Index].ToString());
 						});
 
+$(if (!$NoSepcialArgsHandling) {@"
 						int separator = 0;
 						int idx = 0;
 						foreach (string s in args)
@@ -2609,20 +2615,20 @@ $(if (!$noConsole) {@"
 							}
 							idx++;
 						}
-
+"@ })
 						Assembly executingAssembly = Assembly.GetExecutingAssembly();
 						using (System.IO.Stream scriptstream = executingAssembly.GetManifestResourceStream("$([System.IO.Path]::GetFileName($inputFile))"))
 						{
 							using (System.IO.StreamReader scriptreader = new System.IO.StreamReader(scriptstream, System.Text.Encoding.UTF8))
 							{
 								string script = scriptreader.ReadToEnd();
-
+$(if (!$NoSepcialArgsHandling) {@"
 								if (!string.IsNullOrEmpty(extractFN))
 								{
 									System.IO.File.WriteAllText(extractFN, script);
 									return 0;
 								}
-
+"@ })
 								posh.AddScript(script);
 							}
 						}
@@ -2632,7 +2638,7 @@ $(if (!$noConsole) {@"
 						// regex for named parameters
 						System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"^-([^: ]+)[ :]?([^:]*)$");
 
-						for (int i = separator; i < args.Length; i++)
+						for (int i = $(if (!$NoSepcialArgsHandling) {'separator'}else{'0'}); i < args.Length; i++)
 						{
 							System.Text.RegularExpressions.Match match = regex.Match(args[i]);
 							double dummy;
@@ -2715,6 +2721,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 "@ } })
 			}
 
+$(if (!$NoSepcialArgsHandling) {@"
 			if (paramWait)
 			{
 $(if (!$noConsole) {@"
@@ -2724,6 +2731,7 @@ $(if (!$noConsole) {@"
 				MessageBox.Show("Click OK to exit...", System.AppDomain.CurrentDomain.FriendlyName);
 "@ })
 			}
+"@ })
 			return me.ExitCode;
 		}
 
