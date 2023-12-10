@@ -106,6 +106,12 @@ Output.exe -extract:C:\Output.ps1
 ```
 will decompile the script stored in Output.exe.
 
+### Distinguish environment by script  
+You can tell whether a script is running in a compiled exe or in a script by `$Host.Name`.  
+```powershell
+if ($Host.Name -eq "PSRunspace-Host") { Write-Output "PS2EXE" } else { Write-Output "Some other host" }
+```
+
 ### Script variables:
 Since PS2EXE converts a script to an executable, script related variables are not available anymore. Especially the variable $PSScriptRoot is empty.
 
