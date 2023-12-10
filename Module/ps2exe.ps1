@@ -200,7 +200,7 @@ function Invoke-ps2exe
 
 		$CallParam += " -nested"
 
-		powershell -Command "&'$($MyInvocation.MyCommand.Name)' $CallParam"
+		powershell -Command "&'$PSScriptRoot\ps2exe.ps1' $CallParam"
 		return
 	}
 
