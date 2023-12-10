@@ -45,6 +45,8 @@ You might want to pipe your output to Out-String to prevent a message box for ev
 encode output as UNICODE in console mode, useful to display special encoded chars
 .PARAMETER credentialGUI
 use GUI for prompting credentials in console mode instead of console input
+.PARAMETER CompilerOptions
+additional compiler options (see https://msdn.microsoft.com/en-us/library/78f4aasd.aspx)
 .PARAMETER iconFile
 icon file name for the compiled executable
 .PARAMETER title
@@ -107,7 +109,8 @@ function Invoke-ps2exe
 {
 	[CmdletBinding()]
 	Param([STRING]$inputFile = $NULL, [STRING]$outputFile = $NULL, [SWITCH]$prepareDebug, [SWITCH]$x86, [SWITCH]$x64, [int]$lcid,
-		[SWITCH]$STA, [SWITCH]$MTA, [SWITCH]$nested, [SWITCH]$noConsole, [SWITCH]$UNICODEEncoding, [SWITCH]$credentialGUI, [STRING]$iconFile = $NULL,
+		[SWITCH]$STA, [SWITCH]$MTA, [SWITCH]$nested, [SWITCH]$noConsole, [SWITCH]$UNICODEEncoding, [SWITCH]$credentialGUI, [STRING]$CompilerOptions = $NULL,
+		[STRING]$iconFile = $NULL,
 		[STRING]$title, [STRING]$description, [STRING]$company, [STRING]$product, [STRING]$copyright, [STRING]$trademark, [STRING]$version,
 		[SWITCH]$configFile, [SWITCH]$noConfigFile, [SWITCH]$noOutput, [SWITCH]$noError, [SWITCH]$noVisualStyles, [SWITCH]$exitOnCancel,
 		[SWITCH]$DPIAware, [SWITCH]$winFormsDPIAware, [SWITCH]$requireAdmin, [SWITCH]$supportOS, [SWITCH]$virtualize, [SWITCH]$longPaths)
@@ -151,6 +154,7 @@ function Invoke-ps2exe
 		Write-Output "       noConsole = the resulting executable will be a Windows Forms app without a console window"
 		Write-Output " UNICODEEncoding = encode output as UNICODE in console mode"
 		Write-Output "   credentialGUI = use GUI for prompting credentials in console mode"
+		Write-Output " CompilerOptions = additional compiler options (see https://msdn.microsoft.com/en-us/library/78f4aasd.aspx)"
 		Write-Output "        iconFile = icon file name for the compiled executable"
 		Write-Output "           title = title information (displayed in details tab of Windows Explorer's properties dialog)"
 		Write-Output "     description = description information (not displayed, but embedded in executable)"
@@ -403,11 +407,10 @@ function Invoke-ps2exe
 	}
 
 	if (!$virtualize)
-	{ $cp.CompilerOptions = "/platform:$($platform) /target:$( if ($noConsole){'winexe'}else{'exe'}) $($iconFileParam) $($manifestParam)" }
-	else
-	{
+	{ $cp.CompilerOptions = "$CompilerOptions /platform:$($platform) /target:$( if ($noConsole){'winexe'}else{'exe'}) $($iconFileParam) $($manifestParam)" }
+	else {
 		Write-Output "Application virtualization is activated, forcing x86 platfom."
-		$cp.CompilerOptions = "/platform:x86 /target:$( if ($noConsole) { 'winexe' } else { 'exe' } ) /nowin32manifest $($iconFileParam)"
+		$cp.CompilerOptions = "$CompilerOptions /platform:x86 /target:$( if ($noConsole) { 'winexe' } else { 'exe' } ) /nowin32manifest $($iconFileParam)"
 	}
 
 	$cp.IncludeDebugInformation = $prepareDebug
