@@ -2,12 +2,12 @@
 .SYNOPSIS
 ps2exe is a module to compile powershell scripts to executables.
 .NOTES
-Version: 1.0.13
-Date: 2023-09-26
+Version: 1.0.14
+Date: 2024-09-15
 Author: Markus Scholtes
 #>
 
-# Load modules manually for security reasons
+# Load module manually for security reason
 . "$PSScriptRoot/ps2exe.ps1"
 
 # Define aliases

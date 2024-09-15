@@ -12,6 +12,8 @@ Please see Remarks on project page for topics "GUI mode output formatting", "Con
 
 A generated executable has the following reserved parameters:
 
+-? [<MODIFIER>]     Powershell help text of the script inside the executable. The optional parameter combination
+                    "-? -detailed", "-? -examples" or "-? -full" can be used to get the appropriate help text.
 -debug              Forces the executable to be debugged. It calls "System.Diagnostics.Debugger.Launch()".
 -extract:<FILENAME> Extracts the powerShell script inside the executable and saves it as FILENAME.
 										The script will not be executed.
@@ -95,8 +97,8 @@ Compiles C:\Data\MyScript.ps1 to C:\Data\MyScriptGUI.exe as graphical executable
 Win-PS2EXE
 Start graphical front end to Invoke-ps2exe
 .NOTES
-Version: 0.5.0.29
-Date: 2023-09-23
+Version: 0.5.0.30
+Date: 2024-09-14
 Author: Ingo Karstein, Markus Scholtes
 .LINK
 https://www.powershellgallery.com/packages/ps2exe
@@ -114,7 +116,7 @@ function Invoke-ps2exe
 
 <################################################################################>
 <##                                                                            ##>
-<##      PS2EXE-GUI v0.5.0.29                                                  ##>
+<##      PS2EXE-GUI v0.5.0.30                                                  ##>
 <##      Written by: Ingo Karstein (http://blog.karstein-consulting.com)       ##>
 <##      Reworked and GUI support by Markus Scholtes                           ##>
 <##                                                                            ##>
@@ -126,7 +128,7 @@ function Invoke-ps2exe
 
 	if (!$nested)
 	{
-		Write-Output "PS2EXE-GUI v0.5.0.29 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
+		Write-Output "PS2EXE-GUI v0.5.0.30 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
 	}
 	else
 	{
@@ -218,7 +220,7 @@ function Invoke-ps2exe
 	else
 	{
 		$outputFile = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($outputFile)
-		if ((Test-Path -LiteralPath $OutputFile -PathType Container))
+		if ((Test-Path -Literalpath $outputFile -PathType Container))
 		{
 			$outputFile = ([System.IO.Path]::Combine($outputFile, [System.IO.Path]::GetFileNameWithoutExtension($inputFile)+".exe"))
 		}
@@ -578,6 +580,11 @@ $(if ($noConsole){ @"
 		// Speicher für Konsolenfarben bei GUI-Output werden gelesen und gesetzt, aber im Moment nicht genutzt (for future use)
 		private ConsoleColor GUIBackgroundColor = ConsoleColor.White;
 		private ConsoleColor GUIForegroundColor = ConsoleColor.Black;
+$(if ([STRING]::IsNullOrEmpty($title)){ @"
+		private string GUITitle = System.AppDomain.CurrentDomain.FriendlyName;
+"@ } else {@"
+		private string GUITitle = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyTitleAttribute>().Title;
+"@ })
 "@ } else {@"
 		const int STD_OUTPUT_HANDLE = -11;
 
@@ -877,9 +884,9 @@ $(if (!$noConsole) {@"
 			return new KeyInfo((int)cki.Key, cki.KeyChar, cks, (options & ReadKeyOptions.IncludeKeyDown)!=0);
 "@ } else {@"
 			if ((options & ReadKeyOptions.IncludeKeyDown)!=0)
-				return ReadKey_Box.Show("", "", true);
+				return ReadKey_Box.Show(WindowTitle, "", true);
 			else
-				return ReadKey_Box.Show("", "", false);
+				return ReadKey_Box.Show(WindowTitle, "", false);
 "@ })
 		}
 
@@ -993,13 +1000,15 @@ $(if (!$noConsole){ @"
 $(if (!$noConsole){ @"
 				return Console.Title;
 "@ } else {@"
-				return System.AppDomain.CurrentDomain.FriendlyName;
+				return GUITitle;
 "@ })
 			}
 			set
 			{
 $(if (!$noConsole){ @"
 				Console.Title = value;
+"@ } else {@"
+				GUITitle = value;
 "@ })
 			}
 		}
@@ -1065,10 +1074,7 @@ $(if ($noConsole){ @"
 			buttonCancel.SetBounds(System.Math.Max(93, label.Right - 77), label.Bottom + 36, 75, 23);
 
 			// Configure form
-			if (string.IsNullOrEmpty(strTitle))
-				form.Text = System.AppDomain.CurrentDomain.FriendlyName;
-			else
-				form.Text = strTitle;
+			form.Text = strTitle;
 			form.ClientSize = new System.Drawing.Size(System.Math.Max(178, label.Right + 10), label.Bottom + 71);
 			form.Controls.AddRange(new Control[] { textBox, buttonOk, buttonCancel });
 			form.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -1300,10 +1306,7 @@ $(if ($noConsole){ @"
 			form.Controls.Add(label);
 
 			// configure form
-			if (string.IsNullOrEmpty(strTitle))
-				form.Text = System.AppDomain.CurrentDomain.FriendlyName;
-			else
-				form.Text = strTitle;
+			form.Text = strTitle;
 			form.ClientSize = new System.Drawing.Size(System.Math.Max(178, label.Right + 10), label.Bottom + 55);
 			form.FormBorderStyle = FormBorderStyle.FixedDialog;
 			form.StartPosition = FormStartPosition.CenterScreen;
@@ -1325,6 +1328,7 @@ $(if ($noConsole){ @"
 	public class Progress_Form : Form
 	{
 		private ConsoleColor ProgressBarColor = ConsoleColor.DarkCyan;
+		private string WindowTitle = "";
 
 $(if (!$noVisualStyles) {@"
 		private System.Timers.Timer timer = new System.Timers.Timer();
@@ -1370,6 +1374,24 @@ $(if (!$noVisualStyles) {@"
 			}
 		}
 
+		public Progress_Form()
+		{
+			InitializeComponent();
+		}
+
+		public Progress_Form(ConsoleColor BarColor)
+		{
+			ProgressBarColor = BarColor;
+			InitializeComponent();
+		}
+
+		public Progress_Form(string Title, ConsoleColor BarColor)
+		{
+			WindowTitle = Title;
+			ProgressBarColor = BarColor;
+			InitializeComponent();
+		}
+
 		private void InitializeComponent()
 		{
 			this.SuspendLayout();
@@ -1378,7 +1400,7 @@ $(if (!$noVisualStyles) {@"
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 
 			this.AutoScroll = true;
-			this.Text = System.AppDomain.CurrentDomain.FriendlyName;
+			this.Text = WindowTitle;
 			this.Height = 147;
 			this.Width = 800;
 			this.BackColor = Color.White;
@@ -1485,17 +1507,6 @@ $(if ($noVisualStyles) {@"
 		public int GetCount()
 		{
 			return progressDataList.Count;
-		}
-
-		public Progress_Form()
-		{
-			InitializeComponent();
-		}
-
-		public Progress_Form(ConsoleColor BarColor)
-		{
-			ProgressBarColor = BarColor;
-			InitializeComponent();
 		}
 
 		public void Update(ProgressRecord objRecord)
@@ -1797,8 +1808,7 @@ $(if (!$noConsole) {@"
 				MessageBox.Show(sMeldung, sTitel);
 			}
 
-			// Titel und Labeltext für Input_Box zurücksetzen
-			ib_caption = "";
+			// Labeltext für Input_Box zurücksetzen
 			ib_message = "";
 "@ })
 			Dictionary<string, PSObject> ret = new Dictionary<string, PSObject>();
@@ -1912,8 +1922,7 @@ $(if (!$noConsole) {@"
 				}
 			}
 $(if ($noConsole) {@"
-			// Titel und Labeltext für Input_Box zurücksetzen
-			ib_caption = "";
+			// Labeltext für Input_Box zurücksetzen
 			ib_message = "";
 "@ })
 			return ret;
@@ -2094,6 +2103,7 @@ $(if (!$noConsole) {@"
 			return Console.ReadLine();
 "@ } else {@"
 			string sWert = "";
+			ib_caption = rawUI.WindowTitle;
 			if (Input_Box.Show(ib_caption, ib_message, ref sWert) == DialogResult.OK)
 				return sWert;
 			else
@@ -2141,7 +2151,7 @@ $(if (!$noConsole) {@"
 			secstr = getPassword();
 "@ } else {@"
 			string sWert = "";
-
+			ib_caption = rawUI.WindowTitle;
 			if (Input_Box.Show(ib_caption, ib_message, ref sWert, true) == DialogResult.OK)
 			{
 				foreach (char ch in sWert)
@@ -2167,7 +2177,7 @@ $(if (!$noOutput) { if (!$noConsole) {@"
 			Console.BackgroundColor = bgc;
 "@ } else {@"
 			if ((!string.IsNullOrEmpty(value)) && (value != "\n"))
-				MessageBox.Show(value, System.AppDomain.CurrentDomain.FriendlyName);
+				MessageBox.Show(value, rawUI.WindowTitle);
 "@ } })
 		}
 
@@ -2177,7 +2187,7 @@ $(if (!$noOutput) { if (!$noConsole) {@"
 			Console.Write(value);
 "@ } else {@"
 			if ((!string.IsNullOrEmpty(value)) && (value != "\n"))
-				MessageBox.Show(value, System.AppDomain.CurrentDomain.FriendlyName);
+				MessageBox.Show(value, rawUI.WindowTitle);
 "@ } })
 		}
 
@@ -2187,7 +2197,7 @@ $(if (!$noOutput) { if (!$noConsole) {@"
 $(if (!$noError) { if (!$noConsole) {@"
 			WriteLineInternal(DebugForegroundColor, DebugBackgroundColor, string.Format("DEBUG: {0}", message));
 "@ } else {@"
-			MessageBox.Show(message, System.AppDomain.CurrentDomain.FriendlyName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+			MessageBox.Show(message, rawUI.WindowTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
 "@ } })
 		}
 
@@ -2200,7 +2210,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 			else
 				WriteLineInternal(ErrorForegroundColor, ErrorBackgroundColor, string.Format("ERROR: {0}", value));
 "@ } else {@"
-			MessageBox.Show(value, System.AppDomain.CurrentDomain.FriendlyName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+			MessageBox.Show(value, rawUI.WindowTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
 "@ } })
 		}
 
@@ -2209,7 +2219,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 $(if (!$noOutput) { if (!$noConsole) {@"
 			Console.WriteLine();
 "@ } else {@"
-			MessageBox.Show("", System.AppDomain.CurrentDomain.FriendlyName);
+			MessageBox.Show("", rawUI.WindowTitle);
 "@ } })
 		}
 
@@ -2224,7 +2234,7 @@ $(if (!$noOutput) { if (!$noConsole) {@"
 			Console.BackgroundColor = bgc;
 "@ } else {@"
 			if ((!string.IsNullOrEmpty(value)) && (value != "\n"))
-				MessageBox.Show(value, System.AppDomain.CurrentDomain.FriendlyName);
+				MessageBox.Show(value, rawUI.WindowTitle);
 "@ } })
 		}
 
@@ -2247,7 +2257,7 @@ $(if (!$noOutput) { if (!$noConsole) {@"
 			Console.WriteLine(value);
 "@ } else {@"
 			if ((!string.IsNullOrEmpty(value)) && (value != "\n"))
-				MessageBox.Show(value, System.AppDomain.CurrentDomain.FriendlyName);
+				MessageBox.Show(value, rawUI.WindowTitle);
 "@ } })
 		}
 
@@ -2260,7 +2270,7 @@ $(if ($noConsole) {@"
 			if (pf == null)
 			{
 				if (record.RecordType == ProgressRecordType.Completed) return;
-				pf = new Progress_Form(ProgressForegroundColor);
+				pf = new Progress_Form(rawUI.WindowTitle, ProgressForegroundColor);
 				pf.Show();
 			}
 			pf.Update(record);
@@ -2277,7 +2287,7 @@ $(if ($noConsole) {@"
 $(if (!$noOutput) { if (!$noConsole) {@"
 			WriteLine(VerboseForegroundColor, VerboseBackgroundColor, string.Format("VERBOSE: {0}", message));
 "@ } else {@"
-			MessageBox.Show(message, System.AppDomain.CurrentDomain.FriendlyName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+			MessageBox.Show(message, rawUI.WindowTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
 "@ } })
 		}
 
@@ -2287,7 +2297,7 @@ $(if (!$noOutput) { if (!$noConsole) {@"
 $(if (!$noError) { if (!$noConsole) {@"
 			WriteLineInternal(WarningForegroundColor, WarningBackgroundColor, string.Format("WARNING: {0}", message));
 "@ } else {@"
-			MessageBox.Show(message, System.AppDomain.CurrentDomain.FriendlyName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+			MessageBox.Show(message, rawUI.WindowTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
 "@ } })
 		}
 	}
@@ -2455,7 +2465,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 		{
 			get
 			{
-				return new Version(0, 5, 0, 29);
+				return new Version(0, 5, 0, 30);
 			}
 		}
 
@@ -2579,6 +2589,8 @@ $(if (!$noConsole) {@"
 
 						int separator = 0;
 						int idx = 0;
+						bool bHelp = false;
+						string sHelp = "";
 						foreach (string s in args)
 						{
 							if (string.Compare(s, "-wait", true) == 0)
@@ -2602,6 +2614,17 @@ $(if (!$noConsole) {@"
 								separator = idx + 1;
 								break;
 							}
+							else if (string.Compare(s, "-?", true) == 0)
+							{
+								bHelp = true;
+							}
+							else if (bHelp)
+							{
+								if ((string.Compare(s, "-detailed", true) == 0) || (string.Compare(s, "-examples", true) == 0) || (string.Compare(s, "-full", true) == 0))
+								{
+									sHelp = s;
+								}
+							}
 							else if (string.Compare(s, "-debug", true) == 0)
 							{
 								System.Diagnostics.Debugger.Launch();
@@ -2623,69 +2646,77 @@ $(if (!$noConsole) {@"
 									return 0;
 								}
 
-								posh.AddScript(script);
+								if (bHelp)
+								{ // help selected
+									posh.AddScript("function " + System.AppDomain.CurrentDomain.FriendlyName + "{" + script + "}; Get-Help " + System.AppDomain.CurrentDomain.FriendlyName + " " + sHelp + " | Out-String");
+								} else { // execution selected
+									posh.AddScript(script);
+								}
 							}
 						}
 
-						// parse parameters
-						string argbuffer = null;
-						// regex for named parameters
-						System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"^-([^: ]+)[ :]?([^:]*)$");
+						if (!bHelp)
+						{ // only if no help selected
+							// parse parameters
+							string argbuffer = null;
+							// regex for named parameters
+							System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"^-([^: ]+)[ :]?([^:]*)$");
 
-						for (int i = separator; i < args.Length; i++)
-						{
-							System.Text.RegularExpressions.Match match = regex.Match(args[i]);
-							double dummy;
+							for (int i = separator; i < args.Length; i++)
+							{
+								System.Text.RegularExpressions.Match match = regex.Match(args[i]);
+								double dummy;
 
-							if ((match.Success && match.Groups.Count == 3) && (!Double.TryParse(args[i], out dummy)))
-							{ // parameter in powershell style, means named parameter found
-								if (argbuffer != null) // already a named parameter in buffer, then flush it
-									posh.AddParameter(argbuffer);
+								if ((match.Success && match.Groups.Count == 3) && (!Double.TryParse(args[i], out dummy)))
+								{ // parameter in powershell style, means named parameter found
+									if (argbuffer != null) // already a named parameter in buffer, then flush it
+										posh.AddParameter(argbuffer);
 
-								if (match.Groups[2].Value.Trim() == "")
-								{ // store named parameter in buffer
-									argbuffer = match.Groups[1].Value;
-								}
-								else
-									// caution: when called in powershell $TRUE gets converted, when called in cmd.exe not
-									if ((match.Groups[2].Value == "$TRUE") || (match.Groups[2].Value.ToUpper() == "\x24TRUE"))
-									{ // switch found
-										posh.AddParameter(match.Groups[1].Value, true);
-										argbuffer = null;
+									if (match.Groups[2].Value.Trim() == "")
+									{ // store named parameter in buffer
+										argbuffer = match.Groups[1].Value;
 									}
 									else
-										// caution: when called in powershell $FALSE gets converted, when called in cmd.exe not
-										if ((match.Groups[2].Value == "$FALSE") || (match.Groups[2].Value.ToUpper() == "\x24"+"FALSE"))
+										// caution: when called in powershell $TRUE gets converted, when called in cmd.exe not
+										if ((match.Groups[2].Value == "$TRUE") || (match.Groups[2].Value.ToUpper() == "\x24TRUE"))
 										{ // switch found
-											posh.AddParameter(match.Groups[1].Value, false);
+											posh.AddParameter(match.Groups[1].Value, true);
 											argbuffer = null;
 										}
 										else
-										{ // named parameter with value found
-											posh.AddParameter(match.Groups[1].Value, match.Groups[2].Value);
-											argbuffer = null;
-										}
-							}
-							else
-							{ // unnamed parameter found
-								if (argbuffer != null)
-								{ // already a named parameter in buffer, so this is the value
-									posh.AddParameter(argbuffer, args[i]);
-									argbuffer = null;
+											// caution: when called in powershell $FALSE gets converted, when called in cmd.exe not
+											if ((match.Groups[2].Value == "$FALSE") || (match.Groups[2].Value.ToUpper() == "\x24"+"FALSE"))
+											{ // switch found
+												posh.AddParameter(match.Groups[1].Value, false);
+												argbuffer = null;
+											}
+											else
+											{ // named parameter with value found
+												posh.AddParameter(match.Groups[1].Value, match.Groups[2].Value);
+												argbuffer = null;
+											}
 								}
 								else
-								{ // position parameter found
-									posh.AddArgument(args[i]);
+								{ // unnamed parameter found
+									if (argbuffer != null)
+									{ // already a named parameter in buffer, so this is the value
+										posh.AddParameter(argbuffer, args[i]);
+										argbuffer = null;
+									}
+									else
+									{ // position parameter found
+										posh.AddArgument(args[i]);
+									}
 								}
 							}
+
+							if (argbuffer != null) posh.AddParameter(argbuffer); // flush parameter buffer...
+
+							// convert output to strings
+							posh.AddCommand("Out-String");
+							// with a single string per line
+							posh.AddParameter("Stream");
 						}
-
-						if (argbuffer != null) posh.AddParameter(argbuffer); // flush parameter buffer...
-
-						// convert output to strings
-						posh.AddCommand("Out-String");
-						// with a single string per line
-						posh.AddParameter("Stream");
 
 						posh.BeginInvoke<string, PSObject>(colInput, colOutput, null, new AsyncCallback(delegate(IAsyncResult ar)
 						{
