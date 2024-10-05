@@ -3,7 +3,7 @@ Overworking of the great script of Ingo Karstein with GUI support. The GUI outpu
 
 Module version.
 
-You find the script based version here (https://github.com/MScholtes/TechNet-Gallery) and here: [PS2EXE-GUI: "Convert" PowerShell Scripts to EXE Files with GUI](https://gallery.technet.microsoft.com/PS2EXE-GUI-Convert-e7cb69d5).
+You find the script based version here (https://github.com/MScholtes/TechNet-Gallery).
 
 Author: Markus Scholtes
 
@@ -16,7 +16,7 @@ Date: 2024-09-15
 ```powershell
 PS C:\> Install-Module ps2exe
 ```
-(on Powershell V4 you may have to install PowershellGet before) or download from here: https://www.powershellgallery.com/packages/ps2exe/.
+or download from here: https://www.powershellgallery.com/packages/ps2exe/.
 
 ## Usage
 ```powershell
