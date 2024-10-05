@@ -1,5 +1,5 @@
 # PS2EXE
-Overworking of the great script of Ingo Karstein with GUI support. The GUI output and input is activated with one switch, real windows executables are generated. With Powershell 5.x support and graphical front end.
+Overworking of the great script of Ingo Karstein with GUI support. The GUI output and input is activated with one switch, real windows executables are generated. Compiles only with and to Powershell 5.x. Now with optional graphical front end.
 
 Module version.
 
