@@ -1,5 +1,5 @@
 # PS2EXE
-Overworking of the great script of Ingo Karstein with GUI support. The GUI output and input is activated with one switch, real windows executables are generated. Compiles only with and to Powershell 5.x. With optional graphical front end Win-PS2EXE.
+Overworking of the great script of Ingo Karstein with GUI support. The GUI output and input is activated with one switch, real windows executables are generated. Compiles only Powershell 5.x compatible scripts. With optional graphical front end Win-PS2EXE.
 
 Module version.
 
@@ -7,9 +7,9 @@ You find the script based version here (https://github.com/MScholtes/TechNet-Gal
 
 Author: Markus Scholtes
 
-Version: 1.0.14
+Version: 1.0.15
 
-Date: 2024-09-15
+Date: 2025-01-05
 
 ## Installation
 
@@ -89,11 +89,16 @@ A generated executable has the following reserved parameters:
 
 ## Remarks
 
+### Use of Powershell Core:
+PS2EXE can be used with Powershell Core. To do so just install the module PS2EXE in Powershell Core as described above. But since .Net Core is not delivered with a compiler, the compiler of .Net Framework is used (.Net Framework and Powershell 5.1 are included in Windows).
+
+**For this reason PS2EXE can only compile Powershell 5.1 compatible scripts and generates .Net 4.x binaries, but can still be used directly on every supported Windows OS without dependencies.**
+
 ### List of cmdlets not implemented:
 The basic input/output commands had to be rewritten in C# for PS2EXE. Not implemented are *Write-Progress* in console mode (too much work) and *Start-Transcript*/*Stop-Transcript* (no proper reference implementation by Microsoft).
 
 ### GUI mode output formatting:
-Per default in powershell outputs of commandlets are formatted line per line (as an array of strings). When your command generates 10 lines of output and you use GUI output, 10 message boxes will appear each awaiting for an OK. To prevent this pipe your commandto the comandlet Out-String. This will convert the output to one string array with 10 lines, all output will be shown in one message box (for example: dir C:\ | Out-String).
+By default in powershell outputs of commandlets are formatted line per line (as an array of strings). When your command generates 10 lines of output and you use GUI output, 10 message boxes will appear each awaiting for an OK. To prevent this pipe your commandto the comandlet Out-String. This will convert the output to one string array with 10 lines, all output will be shown in one message box (for example: dir C:\ | Out-String).
 
 ### Config files:
 PS2EXE can create config files with the name of the generated executable + ".config". In most cases those config files are not necessary, they are a manifest that tells which .Net Framework version should be used. As you will usually use the actual .Net Framework, try running your excutable without the config file.
@@ -139,6 +144,9 @@ $Host.UI.RawUI.FlushInputBuffer()
 ```
 
 ## Changes:
+### 1.0.15 / 2025-01-05
+- if used only in Powershell Core the module has not to be installed in Powershell 5.1 too
+
 ### 1.0.14 / 2024-09-15
 - new parameter -? for compiled executables to show the help of the original Powershell script
 - in GUI mode window titles are the application title (when set compiling with parameter -title)
