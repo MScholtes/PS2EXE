@@ -16,11 +16,11 @@ A generated executable has the following reserved parameters:
                     "-? -detailed", "-? -examples" or "-? -full" can be used to get the appropriate help text.
 -debug              Forces the executable to be debugged. It calls "System.Diagnostics.Debugger.Launch()".
 -extract:<FILENAME> Extracts the powerShell script inside the executable and saves it as FILENAME.
-										The script will not be executed.
+                    The script will not be executed.
 -wait               At the end of the script execution it writes "Hit any key to exit..." and waits for a
-										key to be pressed.
+                    key to be pressed.
 -end                All following options will be passed to the script inside the executable.
-										All preceding options are used by the executable itself.
+                    All preceding options are used by the executable itself.
 .PARAMETER inputFile
 Powershell script to convert to executable (file has to be UTF8 or UTF16 encoded)
 .PARAMETER outputFile
@@ -97,8 +97,8 @@ Compiles C:\Data\MyScript.ps1 to C:\Data\MyScriptGUI.exe as graphical executable
 Win-PS2EXE
 Start graphical front end to Invoke-ps2exe
 .NOTES
-Version: 0.5.0.30
-Date: 2024-09-14
+Version: 0.5.0.31
+Date: 2025-01-05
 Author: Ingo Karstein, Markus Scholtes
 .LINK
 https://www.powershellgallery.com/packages/ps2exe
@@ -116,7 +116,7 @@ function Invoke-ps2exe
 
 <################################################################################>
 <##                                                                            ##>
-<##      PS2EXE-GUI v0.5.0.30                                                  ##>
+<##      PS2EXE-GUI v0.5.0.31                                                  ##>
 <##      Written by: Ingo Karstein (http://blog.karstein-consulting.com)       ##>
 <##      Reworked and GUI support by Markus Scholtes                           ##>
 <##                                                                            ##>
@@ -128,7 +128,7 @@ function Invoke-ps2exe
 
 	if (!$nested)
 	{
-		Write-Output "PS2EXE-GUI v0.5.0.30 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
+		Write-Output "PS2EXE-GUI v0.5.0.31 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
 	}
 	else
 	{
@@ -202,7 +202,7 @@ function Invoke-ps2exe
 
 		$CallParam += " -nested"
 
-		powershell -Command "&'$($MyInvocation.MyCommand.Name)' $CallParam"
+		powershell -Command "if ((Get-Command -Name 'Invoke-ps2exe' -ErrorAction 'SilentlyContinue').Length -eq 0) { Import-Module '$PSScriptRoot\ps2exe.psm1' }; &'$($MyInvocation.MyCommand.Name)' $CallParam"
 		return
 	}
 
@@ -2093,7 +2093,6 @@ $(if (!$noConsole -and !$credentialGUI) {@"
 		}
 
 $(if ($noConsole) {@"
-		private string ib_caption;
 		private string ib_message;
 "@ })
 
@@ -2103,8 +2102,7 @@ $(if (!$noConsole) {@"
 			return Console.ReadLine();
 "@ } else {@"
 			string sWert = "";
-			ib_caption = rawUI.WindowTitle;
-			if (Input_Box.Show(ib_caption, ib_message, ref sWert) == DialogResult.OK)
+			if (Input_Box.Show(rawUI.WindowTitle, ib_message, ref sWert) == DialogResult.OK)
 				return sWert;
 			else
 "@ })
@@ -2151,8 +2149,7 @@ $(if (!$noConsole) {@"
 			secstr = getPassword();
 "@ } else {@"
 			string sWert = "";
-			ib_caption = rawUI.WindowTitle;
-			if (Input_Box.Show(ib_caption, ib_message, ref sWert, true) == DialogResult.OK)
+			if (Input_Box.Show(rawUI.WindowTitle, ib_message, ref sWert, true) == DialogResult.OK)
 			{
 				foreach (char ch in sWert)
 					secstr.AppendChar(ch);
@@ -2465,7 +2462,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 		{
 			get
 			{
-				return new Version(0, 5, 0, 30);
+				return new Version(0, 5, 0, 31);
 			}
 		}
 
