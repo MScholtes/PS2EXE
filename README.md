@@ -7,9 +7,9 @@ You find the script based version here (https://github.com/MScholtes/TechNet-Gal
 
 Author: Markus Scholtes
 
-Version: 1.0.15
+Version: 1.0.16
 
-Date: 2025-01-05
+Date: 2025-07-20
 
 ## Installation
 
@@ -36,7 +36,7 @@ or start Win-PS2EXE for a graphical front end with
 ## Parameter
 ```powershell
 ps2exe [-inputFile] '<file_name>' [[-outputFile] '<file_name>']
-       [-prepareDebug] [-x86|-x64] [-lcid <id>] [-STA|-MTA] [-noConsole] [-UNICODEEncoding]
+       [-prepareDebug] [-x86|-x64] [-lcid <id>] [-STA|-MTA] [-noConsole] [-conHost] [-UNICODEEncoding]
        [-credentialGUI] [-iconFile '<filename>'] [-title '<title>'] [-description '<description>']
        [-company '<company>'] [-product '<product>'] [-copyright '<copyright>'] [-trademark '<trademark>']
        [-version '<version>'] [-configFile] [-noOutput] [-noError] [-noVisualStyles] [-exitOnCancel]
@@ -51,6 +51,7 @@ ps2exe [-inputFile] '<file_name>' [[-outputFile] '<file_name>']
            lcid = location ID for the compiled executable. Current user culture if not specified
      STA or MTA = 'Single Thread Apartment' or 'Multi Thread Apartment' mode
       noConsole = the resulting executable will be a Windows Forms app without a console window
+        conHost = force start with conhost as console instead of Windows Terminal (disables redirections)
 UNICODEEncoding = encode output as UNICODE in console mode
   credentialGUI = use GUI for prompting credentials in console mode
        iconFile = icon file name for the compiled executable
@@ -144,6 +145,9 @@ $Host.UI.RawUI.FlushInputBuffer()
 ```
 
 ## Changes:
+### 1.0.16 / 2025-07-20
+- new parameter -conHost for force starting compiled executables in Conhost instead of Windows Terminal
+
 ### 1.0.15 / 2025-01-05
 - if used only in Powershell Core the module has not to be installed in Powershell 5.1 too
 
