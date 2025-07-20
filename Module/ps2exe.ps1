@@ -43,6 +43,10 @@ internal use
 the resulting executable will be a Windows Forms app without a console window.
 You might want to pipe your output to Out-String to prevent a message box for every line of output
 (example: dir C:\ | Out-String)
+.PARAMETER conHost
+force start with conhost as console instead of Windows Terminal. If necessary a new console window
+will appear.
+Important: Disables redirection of input, output or error channel!
 .PARAMETER UNICODEEncoding
 encode output as UNICODE in console mode, useful to display special encoded chars
 .PARAMETER credentialGUI
@@ -97,11 +101,9 @@ Compiles C:\Data\MyScript.ps1 to C:\Data\MyScriptGUI.exe as graphical executable
 Win-PS2EXE
 Start graphical front end to Invoke-ps2exe
 .NOTES
-Version: 0.5.0.31
-Date: 2025-01-05
+Version: 0.5.0.32
+Date: 2025-07-20
 Author: Ingo Karstein, Markus Scholtes
-.LINK
-https://www.powershellgallery.com/packages/ps2exe
 .LINK
 https://github.com/MScholtes/PS2EXE
 #>
@@ -109,14 +111,14 @@ function Invoke-ps2exe
 {
 	[CmdletBinding()]
 	Param([STRING]$inputFile = $NULL, [STRING]$outputFile = $NULL, [SWITCH]$prepareDebug, [SWITCH]$x86, [SWITCH]$x64, [int]$lcid,
-		[SWITCH]$STA, [SWITCH]$MTA, [SWITCH]$nested, [SWITCH]$noConsole, [SWITCH]$UNICODEEncoding, [SWITCH]$credentialGUI, [STRING]$iconFile = $NULL,
-		[STRING]$title, [STRING]$description, [STRING]$company, [STRING]$product, [STRING]$copyright, [STRING]$trademark, [STRING]$version,
+		[SWITCH]$STA, [SWITCH]$MTA, [SWITCH]$nested, [SWITCH]$noConsole, [SWITCH]$conHost, [SWITCH]$UNICODEEncoding, [SWITCH]$credentialGUI,
+		[STRING]$iconFile = $NULL, [STRING]$title, [STRING]$description, [STRING]$company, [STRING]$product, [STRING]$copyright, [STRING]$trademark, [STRING]$version,
 		[SWITCH]$configFile, [SWITCH]$noConfigFile, [SWITCH]$noOutput, [SWITCH]$noError, [SWITCH]$noVisualStyles, [SWITCH]$exitOnCancel,
 		[SWITCH]$DPIAware, [SWITCH]$winFormsDPIAware, [SWITCH]$requireAdmin, [SWITCH]$supportOS, [SWITCH]$virtualize, [SWITCH]$longPaths)
 
 <################################################################################>
 <##                                                                            ##>
-<##      PS2EXE-GUI v0.5.0.31                                                  ##>
+<##      PS2EXE-GUI v0.5.0.32                                                  ##>
 <##      Written by: Ingo Karstein (http://blog.karstein-consulting.com)       ##>
 <##      Reworked and GUI support by Markus Scholtes                           ##>
 <##                                                                            ##>
@@ -128,7 +130,7 @@ function Invoke-ps2exe
 
 	if (!$nested)
 	{
-		Write-Output "PS2EXE-GUI v0.5.0.31 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
+		Write-Output "PS2EXE-GUI v0.5.0.32 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
 	}
 	else
 	{
@@ -139,7 +141,7 @@ function Invoke-ps2exe
 	{
 		Write-Output "Usage:`n"
 		Write-Output "Invoke-ps2exe [-inputFile] '<filename>' [[-outputFile] '<filename>']"
-		Write-Output "              [-prepareDebug] [-x86|-x64] [-lcid <id>] [-STA|-MTA] [-noConsole] [-UNICODEEncoding]"
+		Write-Output "              [-prepareDebug] [-x86|-x64] [-lcid <id>] [-STA|-MTA] [-noConsole] [-conHost] [-UNICODEEncoding]"
 		Write-Output "              [-credentialGUI] [-iconFile '<filename>'] [-title '<title>'] [-description '<description>']"
 		Write-Output "              [-company '<company>'] [-product '<product>'] [-copyright '<copyright>'] [-trademark '<trademark>']"
 		Write-Output "              [-version '<version>'] [-configFile] [-noOutput] [-noError] [-noVisualStyles] [-exitOnCancel]"
@@ -151,6 +153,7 @@ function Invoke-ps2exe
 		Write-Output "            lcid = location ID for the compiled executable. Current user culture if not specified"
 		Write-Output "      STA or MTA = 'Single Thread Apartment' or 'Multi Thread Apartment' mode"
 		Write-Output "       noConsole = the resulting executable will be a Windows Forms app without a console window"
+		Write-Output "         conHost = force start with conhost as console instead of Windows Terminal (disables redirections)"
 		Write-Output " UNICODEEncoding = encode output as UNICODE in console mode"
 		Write-Output "   credentialGUI = use GUI for prompting credentials in console mode"
 		Write-Output "        iconFile = icon file name for the compiled executable"
@@ -261,6 +264,11 @@ function Invoke-ps2exe
 		$supportOS = $TRUE
 	}
 
+	if ($noConsole -and $conHost)
+	{
+		Write-Error "-noConsole cannot be combined with -conHost"
+		return
+	}
 	if ($requireAdmin -and $virtualize)
 	{
 		Write-Error "-requireAdmin cannot be combined with -virtualize"
@@ -405,11 +413,11 @@ function Invoke-ps2exe
 	}
 
 	if (!$virtualize)
-	{ $cp.CompilerOptions = "/platform:$($platform) /target:$( if ($noConsole){'winexe'}else{'exe'}) $($iconFileParam) $($manifestParam)" }
+	{ $cp.CompilerOptions = "/platform:$($platform) /target:$( if ($noConsole -or $conHost){'winexe'}else{'exe'}) $($iconFileParam) $($manifestParam)" }
 	else
 	{
 		Write-Output "Application virtualization is activated, forcing x86 platfom."
-		$cp.CompilerOptions = "/platform:x86 /target:$( if ($noConsole) { 'winexe' } else { 'exe' } ) /nowin32manifest $($iconFileParam)"
+		$cp.CompilerOptions = "/platform:x86 /target:$( if ($noConsole -or $conHost) { 'winexe' } else { 'exe' } ) /nowin32manifest $($iconFileParam)"
 	}
 
 	$cp.IncludeDebugInformation = $prepareDebug
@@ -686,7 +694,7 @@ $(if (!$noConsole){ @"
 			get
 			{
 $(if (!$noConsole){ @"
-				if (Console_Info.IsOutputRedirected())
+				if (Console.IsOutputRedirected)
 					// return default value for redirection. If no valid value is returned WriteLine will not be called
 					return new System.Management.Automation.Host.Size(120, 50);
 				else
@@ -751,7 +759,7 @@ $(if ($noConsole){ @"
 		public override void FlushInputBuffer()
 		{
 $(if (!$noConsole){ @"
-			if (!Console_Info.IsInputRedirected())
+			if (!Console.IsInputRedirected)
 			{	while (Console.KeyAvailable)
 					Console.ReadKey(true);
 			}
@@ -1708,60 +1716,6 @@ $(if (!$noVisualStyles) {@"
 	}
 "@})
 
-	// define IsInputRedirected(), IsOutputRedirected() and IsErrorRedirected() here since they were introduced first with .Net 4.5
-	public class Console_Info
-	{
-		private enum FileType : uint
-		{
-			FILE_TYPE_UNKNOWN = 0x0000,
-			FILE_TYPE_DISK = 0x0001,
-			FILE_TYPE_CHAR = 0x0002,
-			FILE_TYPE_PIPE = 0x0003,
-			FILE_TYPE_REMOTE = 0x8000
-		}
-
-		private enum STDHandle : uint
-		{
-			STD_INPUT_HANDLE = unchecked((uint)-10),
-			STD_OUTPUT_HANDLE = unchecked((uint)-11),
-			STD_ERROR_HANDLE = unchecked((uint)-12)
-		}
-
-		[DllImport("Kernel32.dll")]
-		static private extern UIntPtr GetStdHandle(STDHandle stdHandle);
-
-		[DllImport("Kernel32.dll")]
-		static private extern FileType GetFileType(UIntPtr hFile);
-
-		static public bool IsInputRedirected()
-		{
-			UIntPtr hInput = GetStdHandle(STDHandle.STD_INPUT_HANDLE);
-			FileType fileType = (FileType)GetFileType(hInput);
-			if ((fileType == FileType.FILE_TYPE_CHAR) || (fileType == FileType.FILE_TYPE_UNKNOWN))
-				return false;
-			return true;
-		}
-
-		static public bool IsOutputRedirected()
-		{
-			UIntPtr hOutput = GetStdHandle(STDHandle.STD_OUTPUT_HANDLE);
-			FileType fileType = (FileType)GetFileType(hOutput);
-			if ((fileType == FileType.FILE_TYPE_CHAR) || (fileType == FileType.FILE_TYPE_UNKNOWN))
-				return false;
-			return true;
-		}
-
-		static public bool IsErrorRedirected()
-		{
-			UIntPtr hError = GetStdHandle(STDHandle.STD_ERROR_HANDLE);
-			FileType fileType = (FileType)GetFileType(hError);
-			if ((fileType == FileType.FILE_TYPE_CHAR) || (fileType == FileType.FILE_TYPE_UNKNOWN))
-				return false;
-			return true;
-		}
-	}
-
-
 	internal class MainModuleUI : PSHostUserInterface
 	{
 		private MainModuleRawUI rawUI = null;
@@ -2202,7 +2156,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 		public override void WriteErrorLine(string value)
 		{
 $(if (!$noError) { if (!$noConsole) {@"
-			if (Console_Info.IsErrorRedirected())
+			if (Console.IsErrorRedirected)
 				Console.Error.WriteLine(string.Format("ERROR: {0}", value));
 			else
 				WriteLineInternal(ErrorForegroundColor, ErrorBackgroundColor, string.Format("ERROR: {0}", value));
@@ -2462,7 +2416,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 		{
 			get
 			{
-				return new Version(0, 5, 0, 31);
+				return new Version(0, 5, 0, 32);
 			}
 		}
 
@@ -2515,11 +2469,33 @@ $(if (!$noError) { if (!$noConsole) {@"
 			set { this.exitCode = value; }
 		}
 
+$(if ($conHost) {@"
+		[DllImport("kernel32.dll", SetLastError = true)][return: MarshalAs(UnmanagedType.Bool)]
+		private static extern bool AllocConsole();
+"@ })
+
 		$(if ($STA){"[STAThread]"})$(if ($MTA){"[MTAThread]"})
 		private static int Main(string[] args)
 		{
+$(if ($conHost) {@"
+			// before this command no console should be attached or allocation fails
+			if (!AllocConsole()) { Console.Error.WriteLine("Creation of console failed!"); }
+
+			// connect STDIN
+			Console.SetIn(new System.IO.StreamReader(Console.OpenStandardInput()));
+
+			// connect STDOUT
+			System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(Console.OpenStandardOutput());
+			streamWriter.AutoFlush = true;
+			Console.SetOut(streamWriter);
+
+			// connect STDERR
+			System.IO.StreamWriter errorWriter = new System.IO.StreamWriter(Console.OpenStandardOutput());
+			errorWriter.AutoFlush = true;
+			Console.SetError(errorWriter);
+"@ })
 $(if (!$noConsole -and $UNICODEEncoding) {@"
-			System.Console.OutputEncoding = new System.Text.UnicodeEncoding();
+			Console.OutputEncoding = new System.Text.UnicodeEncoding();
 "@ })
 			$culture
 
@@ -2568,7 +2544,7 @@ $(if (!$noConsole) {@"
 						});
 
 						PSDataCollection<string> colInput = new PSDataCollection<string>();
-						if (Console_Info.IsInputRedirected())
+						if (Console.IsInputRedirected)
 						{ // read standard input
 							string sItem = "";
 							while ((sItem = Console.ReadLine()) != null)
