@@ -1,4 +1,4 @@
-// Win-PS2EXE v1.0.1.2
+// Win-PS2EXE v1.0.1.3
 // Front end to Powershell-Script-to-EXE-Compiler PS2EXE.ps1: https://github.com/MScholtes/PS2EXE
 // Markus Scholtes, 2023
 //
@@ -26,11 +26,11 @@ using System.Reflection;
 [assembly:AssemblyConfiguration("")]
 [assembly:AssemblyCompany("MS")]
 [assembly:AssemblyProduct("Win-PS2EXE")]
-[assembly:AssemblyCopyright("© Markus Scholtes 2023")]
+[assembly:AssemblyCopyright("ï¿½ Markus Scholtes 2023")]
 [assembly:AssemblyTrademark("")]
 [assembly:AssemblyCulture("")]
-[assembly:AssemblyVersion("1.0.1.2")]
-[assembly:AssemblyFileVersion("1.0.1.2")]
+[assembly:AssemblyVersion("1.0.1.3")]
+[assembly:AssemblyFileVersion("1.0.1.3")]
 
 namespace WPFApplication
 {
@@ -355,100 +355,324 @@ namespace WPFApplication
 			// XAML string defining the window controls
 			string strXAML = @"
 <local:CustomWindow
-	xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation""
-	xmlns:local=""clr-namespace:WPFApplication;assembly=***ASSEMBLY***""
-	xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml""
-	x:Name=""Window"" Title=""Win-PS2EXE"" WindowStartupLocation=""CenterScreen""
-	Background=""#FFE8E8E8""  Width=""504"" Height=""392"" ShowInTaskbar=""True"">
-	<Grid>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width=""auto"" />
-			<ColumnDefinition Width=""auto"" />
-			<ColumnDefinition Width=""auto"" />
-		</Grid.ColumnDefinitions>
-		<Grid.RowDefinitions>
-			<RowDefinition Height=""auto"" />
-			<RowDefinition Height=""auto"" />
-			<RowDefinition Height=""auto"" />
-			<RowDefinition Height=""auto"" />
-			<RowDefinition Height=""auto"" />
-			<RowDefinition Height=""auto"" />
-			<RowDefinition Height=""auto"" />
-			<RowDefinition Height=""auto"" />
-			<RowDefinition Height=""auto"" />
-			<RowDefinition Height=""auto"" />
-			<RowDefinition Height=""auto"" />
-			<RowDefinition Height=""auto"" />
-			<RowDefinition Height=""*"" />
-		</Grid.RowDefinitions>
-		<TextBlock Height=""32"" Margin=""0,10,0,0"" FontSize=""16"" Grid.Row=""0"" Grid.Column=""1"" >Win-PS2EXE: Graphical front-end to PS2EXE</TextBlock>
+   xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation""
+   xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml""
+   xmlns:local=""clr-namespace:WPFApplication;assembly=***ASSEMBLY***""
+   x:Name=""Window""
+   Title=""Win-PS2EXE""
+   WindowStyle=""SingleBorderWindow""
+   ResizeMode=""CanResizeWithGrip""
+   WindowStartupLocation=""CenterScreen""
+   Background=""#FF1E1E2E""
+   Width=""515""
+   Height=""670""
+   MinWidth=""515""
+   MinHeight=""670""
+   ShowInTaskbar=""True""
+   FontFamily=""Segoe UI""
+   FontSize=""13""
+>
+   <Window.Resources>
+      <!-- Accent colors -->
+      <SolidColorBrush x:Key=""AccentBrush"" Color=""#FF6C63FF""/>
+      <SolidColorBrush x:Key=""AccentHoverBrush"" Color=""#FF857EFF""/>
+      <SolidColorBrush x:Key=""SurfaceBrush"" Color=""#FF2A2A3C""/>
+      <SolidColorBrush x:Key=""SurfaceLightBrush"" Color=""#FF33334A""/>
+      <SolidColorBrush x:Key=""TextPrimaryBrush"" Color=""#FFEBEBF5""/>
+      <SolidColorBrush x:Key=""TextSecondaryBrush"" Color=""#FF9E9EB8""/>
+      <SolidColorBrush x:Key=""BorderBrush"" Color=""#FF3E3E56""/>
+      <SolidColorBrush x:Key=""CancelBrush"" Color=""#FF3E3E56""/>
+      <SolidColorBrush x:Key=""CancelHoverBrush"" Color=""#FF52526E""/>
+      
+      <!-- TextBox Style -->
+      <Style TargetType=""TextBox"">
+         <Setter Property=""Background"" Value=""{StaticResource SurfaceLightBrush}""/>
+         <Setter Property=""Foreground"" Value=""{StaticResource TextPrimaryBrush}""/>
+         <Setter Property=""BorderBrush"" Value=""{StaticResource BorderBrush}""/>
+         <Setter Property=""BorderThickness"" Value=""1""/>
+         <Setter Property=""Padding"" Value=""6,4""/>
+         <Setter Property=""Height"" Value=""28""/>
+         <Setter Property=""VerticalContentAlignment"" Value=""Center""/>
+      </Style>
+      
+      <!-- Label Style -->
+      <Style TargetType=""Label"">
+         <Setter Property=""Foreground"" Value=""{StaticResource TextSecondaryBrush}""/>
+         <Setter Property=""VerticalAlignment"" Value=""Center""/>
+         <Setter Property=""Padding"" Value=""0,0,8,0""/>
+         <Setter Property=""FontSize"" Value=""12""/>
+      </Style>
+      
+      <!-- CheckBox Style -->
+      <Style TargetType=""CheckBox"">
+         <Setter Property=""Foreground"" Value=""{StaticResource TextPrimaryBrush}""/>
+         <Setter Property=""VerticalAlignment"" Value=""Center""/>
+         <Setter Property=""Margin"" Value=""0,2""/>
+      </Style>
+      
+      <!-- RadioButton Style -->
+      <Style TargetType=""RadioButton"">
+         <Setter Property=""Foreground"" Value=""{StaticResource TextPrimaryBrush}""/>
+         <Setter Property=""VerticalAlignment"" Value=""Center""/>
+      </Style>
+      
+      <!-- ComboBox ToggleButton Template -->
+      <ControlTemplate x:Key=""ComboBoxToggleButtonTemplate"" TargetType=""ToggleButton"">
+         <Grid>
+            <Grid.ColumnDefinitions>
+               <ColumnDefinition/>
+               <ColumnDefinition Width=""20""/>
+            </Grid.ColumnDefinitions>
+            <Border x:Name=""Border"" Grid.ColumnSpan=""2"" Background=""{StaticResource SurfaceLightBrush}"" BorderBrush=""{StaticResource BorderBrush}"" BorderThickness=""1"" CornerRadius=""3""/>
+            <Path x:Name=""Arrow"" Grid.Column=""1"" HorizontalAlignment=""Center"" VerticalAlignment=""Center"" Data=""M 0 0 L 4 4 L 8 0 Z"" Fill=""{StaticResource TextSecondaryBrush}""/>
+         </Grid>
+         <ControlTemplate.Triggers>
+            <Trigger Property=""IsMouseOver"" Value=""True"">
+               <Setter TargetName=""Border"" Property=""BorderBrush"" Value=""{StaticResource AccentBrush}""/>
+               <Setter TargetName=""Arrow"" Property=""Fill"" Value=""{StaticResource TextPrimaryBrush}""/>
+            </Trigger>
+         </ControlTemplate.Triggers>
+      </ControlTemplate>
 
-		<Label Grid.Row=""1"" Grid.Column=""0"">Source file: </Label>
-		<TextBox x:Name=""SourceFile"" Height=""18"" Width=""362"" Margin=""0,0,10,0"" AllowDrop=""True"" ToolTip=""Path and name of the source file (the only mandatory field)"" Grid.Row=""1"" Grid.Column=""1""
-			PreviewDragEnter=""TextBox_PreviewDragOver"" PreviewDragOver=""TextBox_PreviewDragOver"" PreviewDrop=""TextBox_PreviewDrop"" />
-		<Button x:Name=""SourceFilePicker"" Background=""#FFD0D0D0"" Height=""18"" Width=""24"" Content=""..."" ToolTip=""File picker for source file"" Grid.Row=""1"" Grid.Column=""2""
-			Click=""FilePicker_Click"" />
+      <!-- ComboBox Style -->
+      <Style TargetType=""ComboBox"">
+         <Setter Property=""Foreground"" Value=""{StaticResource TextPrimaryBrush}""/>
+         <Setter Property=""Height"" Value=""28""/>
+         <Setter Property=""SnapsToDevicePixels"" Value=""True""/>
+         <Setter Property=""Template"">
+            <Setter.Value>
+               <ControlTemplate TargetType=""ComboBox"">
+                  <Grid>
+                     <ToggleButton x:Name=""ToggleButton"" Template=""{StaticResource ComboBoxToggleButtonTemplate}"" Focusable=""False"" ClickMode=""Press"" IsChecked=""{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}""/>
+                     <ContentPresenter x:Name=""ContentSite"" IsHitTestVisible=""False"" Content=""{TemplateBinding SelectionBoxItem}"" ContentTemplate=""{TemplateBinding SelectionBoxItemTemplate}"" Margin=""8,0,24,0"" VerticalAlignment=""Center"" HorizontalAlignment=""Left"">
+                        <ContentPresenter.Resources>
+                           <Style TargetType=""TextBlock"">
+                              <Setter Property=""Foreground"" Value=""{StaticResource TextPrimaryBrush}""/>
+                           </Style>
+                        </ContentPresenter.Resources>
+                     </ContentPresenter>
+                     <Popup x:Name=""Popup"" Placement=""Bottom"" IsOpen=""{TemplateBinding IsDropDownOpen}"" AllowsTransparency=""True"" Focusable=""False"" PopupAnimation=""Slide"">
+                        <Grid x:Name=""DropDown"" SnapsToDevicePixels=""True"" MinWidth=""{TemplateBinding ActualWidth}"" MaxHeight=""{TemplateBinding MaxDropDownHeight}"">
+                           <Border x:Name=""DropDownBorder"" Background=""{StaticResource SurfaceLightBrush}"" BorderBrush=""{StaticResource BorderBrush}"" BorderThickness=""1"" CornerRadius=""3"" Margin=""0,1,0,0""/>
+                           <ScrollViewer Margin=""2,3"" SnapsToDevicePixels=""True"">
+                              <StackPanel IsItemsHost=""True"" KeyboardNavigation.DirectionalNavigation=""Contained""/>
+                           </ScrollViewer>
+                        </Grid>
+                     </Popup>
+                  </Grid>
+               </ControlTemplate>
+            </Setter.Value>
+         </Setter>
+      </Style>
 
-		<Label Grid.Row=""2"" Grid.Column=""0"">Target file: </Label>
-		<TextBox x:Name=""TargetFile"" Height=""18"" Width=""362"" Margin=""0,0,10,0"" AllowDrop=""True"" ToolTip=""Optional: Name and possibly path of the target file or target directory"" Grid.Row=""2"" Grid.Column=""1""
-			PreviewDragEnter=""TextBox_PreviewDragOver"" PreviewDragOver=""TextBox_PreviewDragOver"" PreviewDrop=""TextBox_PreviewDrop"" />
-		<Button x:Name=""TargetFilePicker"" Background=""#FFD0D0D0"" Height=""18"" Width=""24"" Content=""..."" ToolTip=""Directory picker for target directory"" Grid.Row=""2"" Grid.Column=""2""
-			Click=""FilePicker_Click"" />
-
-		<Label Grid.Row=""3"" Grid.Column=""0"">Icon file: </Label>
-		<TextBox x:Name=""IconFile"" Height=""18"" Width=""362"" Margin=""0,0,10,0"" AllowDrop=""True"" ToolTip=""Optional: Name and possibly path of the icon file"" Grid.Row=""3"" Grid.Column=""1""
-			PreviewDragEnter=""TextBox_PreviewDragOver"" PreviewDragOver=""TextBox_PreviewDragOver"" PreviewDrop=""TextBox_PreviewDrop"" />
-		<Button x:Name=""IconFilePicker"" Background=""#FFD0D0D0"" Height=""18"" Width=""24"" Content=""..."" ToolTip=""File picker for icon file"" Grid.Row=""3"" Grid.Column=""2""
-			Click=""FilePicker_Click"" />
-
-		<Label Margin=""0,10,0,0"" Grid.Row=""4"" Grid.Column=""0"">Version:</Label>
-		<WrapPanel Margin=""0,10,0,0"" Grid.Row=""4"" Grid.Column=""1"" >
-			<TextBox x:Name=""FileVersion"" Height=""18"" Width=""72"" Margin=""0,0,10,0"" ToolTip=""Optional: Version number in format n.n.n.n"" />
-			<Label Margin=""30,0,0,0"" >File description: </Label>
-			<TextBox x:Name=""FileDescription"" Height=""18"" Width=""156"" ToolTip=""Optional: File description displayed in executable's properties"" />
-		</WrapPanel>
-
-		<Label Grid.Row=""5"" Grid.Column=""0"">Product name:</Label>
-		<WrapPanel Grid.Row=""5"" Grid.Column=""1"" >
-			<TextBox x:Name=""ProductName"" Height=""18"" Width=""100"" Margin=""0,0,10,0"" ToolTip=""Optional: Product name displayed in executable's properties"" />
-			<Label Margin=""30,0,0,0"" >Copyright: </Label>
-			<TextBox x:Name=""Copyright"" Height=""18"" Width=""156"" ToolTip=""Optional: Copyright displayed in executable's properties"" />
-		</WrapPanel>
-
-		<CheckBox x:Name=""noConsole"" IsChecked=""True"" Margin=""0,10,0,0"" ToolTip=""Generate a Windows application instead of a console application"" Grid.Row=""6"" Grid.Column=""1"">Compile a graphic windows program (parameter -noConsole)</CheckBox>
-
-		<WrapPanel Grid.Row=""7"" Grid.Column=""1"" >
-			<CheckBox x:Name=""noOutput"" IsChecked=""False"" ToolTip=""Supress any output including verbose and informational output"" >Suppress output (-noOutput)</CheckBox>
-			<CheckBox x:Name=""noError"" IsChecked=""False"" Margin=""6,0,0,0"" ToolTip=""Supress any error message including warning and debug output"" >Suppress error output (-noError)</CheckBox>
-		</WrapPanel>
-
-		<CheckBox x:Name=""requireAdmin"" IsChecked=""False"" ToolTip=""Request administrative rights (UAC) at runtime if not already present"" Grid.Row=""8"" Grid.Column=""1"">Require administrator rights at runtime (parameter -requireAdmin)</CheckBox>
-
-		<CheckBox x:Name=""configFile"" IsChecked=""False"" ToolTip=""Enable creation of OUTPUTFILE.exe.config"" Grid.Row=""9"" Grid.Column=""1"">Generate config file (parameter -configFile)</CheckBox>
-
-		<WrapPanel Grid.Row=""10"" Grid.Column=""1"" >
-			<Label>Thread Apartment State: </Label>
-			<RadioButton x:Name=""STA"" VerticalAlignment=""Center"" IsChecked=""True"" GroupName=""ThreadAppartment"" Content=""STA"" ToolTip=""'Single Thread Apartment' mode (recommended)"" />
-			<RadioButton x:Name=""MTA"" Margin=""4,0,0,0"" VerticalAlignment=""Center"" IsChecked=""False"" GroupName=""ThreadAppartment"" Content=""MTA"" ToolTip=""'Multi Thread Apartment' mode"" />
-			<Label Margin=""6,0,0,0"" >Platform: </Label>
-			<ComboBox x:Name=""Platform"" Height=""22"" Margin=""2,0,0,0"" ToolTip=""Designated CPU platform"" >
-				<ComboBoxItem IsSelected=""True"">AnyCPU</ComboBoxItem>
-				<ComboBoxItem>x64</ComboBoxItem>
-				<ComboBoxItem>x86</ComboBoxItem>
-			</ComboBox>
-		</WrapPanel>
-
-		<Label Grid.Row=""11"" Grid.Column=""0"">Parameters:</Label>
-		<TextBox x:Name=""AdditionParameters"" Height=""18"" Width=""362"" Margin=""0,0,10,0"" AllowDrop=""False"" ToolTip=""Optional: Additional parameters"" Grid.Row=""11"" Grid.Column=""1"" />
-
-		<WrapPanel Margin=""0,5,0,0"" HorizontalAlignment=""Right"" Grid.Row=""12"" Grid.Column=""1"" >
-			<Button x:Name=""Compile"" Background=""#FFD0D0D0"" Height=""22"" Width=""72"" Margin=""10"" Content=""Compile"" ToolTip=""Compile source file to an executable"" IsDefault=""True""
-				Click=""Button_Click"" MouseEnter=""Button_MouseEnter"" MouseLeave=""Button_MouseLeave"" />
-			<Button x:Name=""Cancel"" Background=""#FFD0D0D0"" Height=""22"" Width=""72"" Margin=""10"" Content=""Cancel"" ToolTip=""End program without action"" IsCancel=""True""
-				Click=""Button_Click"" MouseEnter=""Button_MouseEnter"" MouseLeave=""Button_MouseLeave"" />
-		</WrapPanel>
-	</Grid>
-</local:CustomWindow>";
+      <!-- ComboBoxItem Style -->
+      <Style TargetType=""ComboBoxItem"">
+         <Setter Property=""Foreground"" Value=""{StaticResource TextPrimaryBrush}""/>
+         <Setter Property=""Background"" Value=""Transparent""/>
+         <Setter Property=""Padding"" Value=""8,4""/>
+         <Setter Property=""SnapsToDevicePixels"" Value=""True""/>
+         <Setter Property=""Template"">
+            <Setter.Value>
+               <ControlTemplate TargetType=""ComboBoxItem"">
+                  <Border x:Name=""Bd"" Background=""{TemplateBinding Background}"" Padding=""{TemplateBinding Padding}"" CornerRadius=""2"" Margin=""2,1"">
+                     <ContentPresenter/>
+                  </Border>
+                  <ControlTemplate.Triggers>
+                     <Trigger Property=""IsHighlighted"" Value=""True"">
+                        <Setter TargetName=""Bd"" Property=""Background"" Value=""{StaticResource AccentBrush}""/>
+                     </Trigger>
+                     <Trigger Property=""IsSelected"" Value=""True"">
+                        <Setter TargetName=""Bd"" Property=""Background"" Value=""{StaticResource SurfaceBrush}""/>
+                     </Trigger>
+                  </ControlTemplate.Triggers>
+               </ControlTemplate>
+            </Setter.Value>
+         </Setter>
+      </Style>
+      
+      <!-- Browse Button Style -->
+      <Style x:Key=""BrowseButtonStyle"" TargetType=""Button"">
+         <Setter Property=""Background"" Value=""{StaticResource SurfaceLightBrush}""/>
+         <Setter Property=""Foreground"" Value=""{StaticResource TextPrimaryBrush}""/>
+         <Setter Property=""BorderBrush"" Value=""{StaticResource BorderBrush}""/>
+         <Setter Property=""BorderThickness"" Value=""1""/>
+         <Setter Property=""Width"" Value=""32""/>
+         <Setter Property=""Height"" Value=""28""/>
+         <Setter Property=""FontWeight"" Value=""Bold""/>
+         <Setter Property=""Cursor"" Value=""Hand""/>
+      </Style>
+      
+      <!-- Primary Button Style -->
+      <Style x:Key=""PrimaryButtonStyle"" TargetType=""Button"">
+         <Setter Property=""Background"" Value=""{StaticResource AccentBrush}""/>
+         <Setter Property=""Foreground"" Value=""White""/>
+         <Setter Property=""BorderThickness"" Value=""0""/>
+         <Setter Property=""Height"" Value=""32""/>
+         <Setter Property=""Width"" Value=""100""/>
+         <Setter Property=""FontSize"" Value=""13""/>
+         <Setter Property=""FontWeight"" Value=""SemiBold""/>
+         <Setter Property=""Cursor"" Value=""Hand""/>
+      </Style>
+      
+      <!-- Secondary Button Style -->
+      <Style x:Key=""SecondaryButtonStyle"" TargetType=""Button"">
+         <Setter Property=""Background"" Value=""{StaticResource CancelBrush}""/>
+         <Setter Property=""Foreground"" Value=""{StaticResource TextPrimaryBrush}""/>
+         <Setter Property=""BorderThickness"" Value=""0""/>
+         <Setter Property=""Height"" Value=""32""/>
+         <Setter Property=""Width"" Value=""100""/>
+         <Setter Property=""FontSize"" Value=""13""/>
+         <Setter Property=""Cursor"" Value=""Hand""/>
+      </Style>
+   </Window.Resources>
+   
+   <Grid Margin=""24,16,24,20"">
+      <Grid.RowDefinitions>
+         <RowDefinition Height=""Auto""/>
+         <RowDefinition Height=""*""/>
+         <RowDefinition Height=""Auto""/>
+      </Grid.RowDefinitions>
+      
+      <!-- Header -->
+      <StackPanel Grid.Row=""0"" Margin=""0,0,0,18"">
+         <TextBlock Text=""Win-PS2EXE"" FontSize=""22"" FontWeight=""Bold"" Foreground=""{StaticResource TextPrimaryBrush}""/>
+         <TextBlock Text=""Graphical front-end to PS2EXE"" FontSize=""12"" Foreground=""{StaticResource TextSecondaryBrush}"" Margin=""0,2,0,0""/>
+      </StackPanel>
+      
+      <!-- Main Content -->
+      <ScrollViewer Grid.Row=""1"" VerticalScrollBarVisibility=""Auto"" HorizontalScrollBarVisibility=""Disabled"">
+         <StackPanel>
+            
+            <!-- File Paths Section -->
+            <Border Background=""{StaticResource SurfaceBrush}"" CornerRadius=""6"" Padding=""16,14"" Margin=""0,0,0,12"">
+               <Grid>
+                  <Grid.ColumnDefinitions>
+                     <ColumnDefinition Width=""90""/>
+                     <ColumnDefinition Width=""*""/>
+                     <ColumnDefinition Width=""Auto""/>
+                  </Grid.ColumnDefinitions>
+                  <Grid.RowDefinitions>
+                     <RowDefinition Height=""Auto""/>
+                     <RowDefinition Height=""8""/>
+                     <RowDefinition Height=""Auto""/>
+                     <RowDefinition Height=""8""/>
+                     <RowDefinition Height=""Auto""/>
+                  </Grid.RowDefinitions>
+                  
+                  <Label Grid.Row=""0"" Grid.Column=""0"" Content=""Source File""/>
+                  <TextBox x:Name=""SourceFile"" Grid.Row=""0"" Grid.Column=""1"" AllowDrop=""True"" ToolTip=""Path and name of the source file (the only mandatory field)""
+                     PreviewDragEnter=""TextBox_PreviewDragOver"" PreviewDragOver=""TextBox_PreviewDragOver"" PreviewDrop=""TextBox_PreviewDrop""/>
+                  <Button x:Name=""SourceFilePicker"" Style=""{StaticResource BrowseButtonStyle}"" Content=""..."" ToolTip=""File picker for source file"" Grid.Row=""0"" Grid.Column=""2"" Margin=""6,0,0,0""
+                     Click=""FilePicker_Click""/>
+                  
+                  <Label Grid.Row=""2"" Grid.Column=""0"" Content=""Target File""/>
+                  <TextBox x:Name=""TargetFile"" Grid.Row=""2"" Grid.Column=""1"" AllowDrop=""True"" ToolTip=""Optional: Name and possibly path of the target file or target directory""
+                     PreviewDragEnter=""TextBox_PreviewDragOver"" PreviewDragOver=""TextBox_PreviewDragOver"" PreviewDrop=""TextBox_PreviewDrop""/>
+                  <Button x:Name=""TargetFilePicker"" Style=""{StaticResource BrowseButtonStyle}"" Content=""..."" ToolTip=""Directory picker for target directory"" Grid.Row=""2"" Grid.Column=""2"" Margin=""6,0,0,0""
+                     Click=""FilePicker_Click""/>
+                  
+                  <Label Grid.Row=""4"" Grid.Column=""0"" Content=""Icon File""/>
+                  <TextBox x:Name=""IconFile"" Grid.Row=""4"" Grid.Column=""1"" AllowDrop=""True"" ToolTip=""Optional: Name and possibly path of the icon file""
+                     PreviewDragEnter=""TextBox_PreviewDragOver"" PreviewDragOver=""TextBox_PreviewDragOver"" PreviewDrop=""TextBox_PreviewDrop""/>
+                  <Button x:Name=""IconFilePicker"" Style=""{StaticResource BrowseButtonStyle}"" Content=""..."" ToolTip=""File picker for icon file"" Grid.Row=""4"" Grid.Column=""2"" Margin=""6,0,0,0""
+                     Click=""FilePicker_Click""/>
+               </Grid>
+            </Border>
+            
+            <!-- Metadata Section -->
+            <Border Background=""{StaticResource SurfaceBrush}"" CornerRadius=""6"" Padding=""16,14"" Margin=""0,0,0,12"">
+               <Grid>
+                  <Grid.ColumnDefinitions>
+                     <ColumnDefinition Width=""90""/>
+                     <ColumnDefinition Width=""*""/>
+                     <ColumnDefinition Width=""16""/>
+                     <ColumnDefinition Width=""90""/>
+                     <ColumnDefinition Width=""*""/>
+                  </Grid.ColumnDefinitions>
+                  <Grid.RowDefinitions>
+                     <RowDefinition Height=""Auto""/>
+                     <RowDefinition Height=""8""/>
+                     <RowDefinition Height=""Auto""/>
+                  </Grid.RowDefinitions>
+                  
+                  <Label Grid.Row=""0"" Grid.Column=""0"" Content=""Version""/>
+                  <TextBox x:Name=""FileVersion"" Grid.Row=""0"" Grid.Column=""1"" ToolTip=""Optional: Version number in format n.n.n.n""/>
+                  <Label Grid.Row=""0"" Grid.Column=""3"" Content=""Description""/>
+                  <TextBox x:Name=""FileDescription"" Grid.Row=""0"" Grid.Column=""4"" ToolTip=""Optional: File description displayed in executable's properties""/>
+                  
+                  <Label Grid.Row=""2"" Grid.Column=""0"" Content=""Product Name""/>
+                  <TextBox x:Name=""ProductName"" Grid.Row=""2"" Grid.Column=""1"" ToolTip=""Optional: Product name displayed in executable's properties""/>
+                  <Label Grid.Row=""2"" Grid.Column=""3"" Content=""Copyright""/>
+                  <TextBox x:Name=""Copyright"" Grid.Row=""2"" Grid.Column=""4"" ToolTip=""Optional: Copyright displayed in executable's properties""/>
+               </Grid>
+            </Border>
+            
+            <!-- Options Section -->
+            <Border Background=""{StaticResource SurfaceBrush}"" CornerRadius=""6"" Padding=""16,12"" Margin=""0,0,0,12"">
+               <StackPanel>
+                  <CheckBox x:Name=""noConsole"" IsChecked=""True"" Margin=""0,2"" ToolTip=""Generate a Windows application instead of a console application"">
+                     Compile as graphical Windows application (-noConsole)
+                  </CheckBox>
+                  <CheckBox x:Name=""noOutput"" IsChecked=""False"" Margin=""0,2"" ToolTip=""Supress any output including verbose and informational output"">
+                     Suppress output (-noOutput)
+                  </CheckBox>
+                  <CheckBox x:Name=""noError"" IsChecked=""False"" Margin=""0,2"" ToolTip=""Supress any error message including warning and debug output"">
+                     Suppress error output (-noError)
+                  </CheckBox>
+                  <CheckBox x:Name=""requireAdmin"" IsChecked=""False"" Margin=""0,2"" ToolTip=""Request administrative rights (UAC) at runtime if not already present"">
+                     Require administrator rights (-requireAdmin)
+                  </CheckBox>
+                  <CheckBox x:Name=""configFile"" IsChecked=""False"" Margin=""0,2"" ToolTip=""Enable creation of OUTPUTFILE.exe.config"">
+                     Generate config file (-configFile)
+                  </CheckBox>
+               </StackPanel>
+            </Border>
+            
+            <!-- Runtime & Parameters Section -->
+            <Border Background=""{StaticResource SurfaceBrush}"" CornerRadius=""6"" Padding=""16,14"" Margin=""0,0,0,0"">
+               <Grid>
+                  <Grid.RowDefinitions>
+                     <RowDefinition Height=""Auto""/>
+                     <RowDefinition Height=""10""/>
+                     <RowDefinition Height=""Auto""/>
+                  </Grid.RowDefinitions>
+                  
+                  <WrapPanel Grid.Row=""0"" VerticalAlignment=""Center"">
+                     <Label Content=""Thread Apartment State"" Margin=""0,0,10,0""/>
+                     <RadioButton x:Name=""STA"" IsChecked=""True"" GroupName=""ThreadAppartment"" Content=""STA"" ToolTip=""'Single Thread Apartment' mode (recommended)"" Margin=""0,0,12,0""/>
+                     <RadioButton x:Name=""MTA"" IsChecked=""False"" GroupName=""ThreadAppartment"" Content=""MTA"" ToolTip=""'Multi Thread Apartment' mode"" Margin=""0,0,24,0""/>
+                     <Label Content=""Platform"" Margin=""0,0,10,0""/>
+                     <ComboBox x:Name=""Platform"" Width=""90"" ToolTip=""Designated CPU platform"">
+                        <ComboBoxItem IsSelected=""True"">AnyCPU</ComboBoxItem>
+                        <ComboBoxItem>x64</ComboBoxItem>
+                        <ComboBoxItem>x86</ComboBoxItem>
+                     </ComboBox>
+                  </WrapPanel>
+                  
+                  <Grid Grid.Row=""2"">
+                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width=""90""/>
+                        <ColumnDefinition Width=""*""/>
+                     </Grid.ColumnDefinitions>
+                     <Label Grid.Column=""0"" Content=""Parameters""/>
+                     <TextBox x:Name=""AdditionParameters"" Grid.Column=""1"" AllowDrop=""False"" ToolTip=""Optional: Additional parameters""/>
+                  </Grid>
+               </Grid>
+            </Border>
+            
+         </StackPanel>
+      </ScrollViewer>
+      
+      <!-- Footer Buttons -->
+      <StackPanel Grid.Row=""2"" Orientation=""Horizontal"" HorizontalAlignment=""Right"" Margin=""0,16,0,0"">
+         <Button x:Name=""Cancel"" Style=""{StaticResource SecondaryButtonStyle}"" Content=""Cancel"" ToolTip=""End program without action"" IsCancel=""True"" Margin=""0,0,10,0""
+            Click=""Button_Click""/>
+         <Button x:Name=""Compile"" Style=""{StaticResource PrimaryButtonStyle}"" Content=""Compile"" ToolTip=""Compile source file to an executable"" IsDefault=""True""
+            Click=""Button_Click""/>
+      </StackPanel>
+   </Grid>
+</local:CustomWindow>
+";
 
 			// generate WPF object tree
 			CustomWindow objWindow;
