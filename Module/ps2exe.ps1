@@ -108,8 +108,8 @@ Compiles C:\Data\MyScript.ps1 to C:\Data\MyScriptGUI.exe as graphical executable
 Win-PS2EXE
 Start graphical front end to Invoke-ps2exe
 .NOTES
-Version: 0.5.0.33
-Date: 2025-08-19
+Version: 0.5.0.34
+Date: 2026-06-06
 Author: Ingo Karstein, Markus Scholtes
 .LINK
 https://github.com/MScholtes/PS2EXE
@@ -125,7 +125,7 @@ function Invoke-ps2exe
 
 <################################################################################>
 <##                                                                            ##>
-<##      PS2EXE-GUI v0.5.0.33                                                  ##>
+<##      PS2EXE-GUI v0.5.0.34                                                  ##>
 <##      Written by: Ingo Karstein (http://blog.karstein-consulting.com)       ##>
 <##      Reworked and GUI support by Markus Scholtes                           ##>
 <##                                                                            ##>
@@ -137,7 +137,7 @@ function Invoke-ps2exe
 
 	if (!$nested)
 	{
-		Write-Output "PS2EXE-GUI v0.5.0.33 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
+		Write-Output "PS2EXE-GUI v0.5.0.34 by Ingo Karstein, reworked and GUI support by Markus Scholtes`n"
 	}
 	else
 	{
@@ -2448,7 +2448,7 @@ $(if (!$noError) { if (!$noConsole) {@"
 		{
 			get
 			{
-				return new Version(0, 5, 0, 33);
+				return new Version(0, 5, 0, 34);
 			}
 		}
 
@@ -2549,6 +2549,9 @@ $(if (!$noConsole -and $UNICODEEncoding) {@"
 				{
 					$(if ($STA -or $MTA) {"myRunSpace.ApartmentState = System.Threading.ApartmentState."})$(if ($STA){"STA"})$(if ($MTA){"MTA"});
 					myRunSpace.Open();
+
+					// add variable $ScriptRoot with absolute directory path of binary
+					myRunSpace.SessionStateProxy.SetVariable("ScriptRoot", System.AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\'));
 
 					using (PowerShell posh = PowerShell.Create())
 					{
