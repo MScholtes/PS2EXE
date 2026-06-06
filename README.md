@@ -1,3 +1,5 @@
+### AI free repository - artificial intelligence is killing creativity and our nature!
+
 # PS2EXE
 Overworking of the great script of Ingo Karstein with GUI support. The GUI output and input is activated with one switch, real windows executables are generated. Compiles only Powershell 5.x compatible scripts. With optional graphical front end Win-PS2EXE.
 
@@ -7,9 +9,9 @@ You find the script based version here (https://github.com/MScholtes/TechNet-Gal
 
 Author: Markus Scholtes
 
-Version: 1.0.17
+Version: 1.0.18
 
-Date: 2025-08-21
+Date: 2026-06-06
 
 ## Installation
 
@@ -46,7 +48,7 @@ ps2exe [-inputFile] '<file_name>' [[-outputFile] '<file_name>']
 ```
       inputFile = Powershell script that you want to convert to executable (file has to be UTF8 or UTF16 encoded)
      outputFile = destination executable file name or folder, defaults to inputFile with extension '.exe'
-   prepareDebug = create helpful information for debugging    
+   prepareDebug = create helpful information for debugging
      x86 or x64 = compile for 32-bit or 64-bit runtime only
            lcid = location ID for the compiled executable. Current user culture if not specified
      STA or MTA = 'Single Thread Apartment' or 'Multi Thread Apartment' mode
@@ -117,25 +119,21 @@ PS2EXE can create config files with the name of the generated executable + ".con
 Compiled scripts process parameters like the original script does. One restriction comes from the Windows environment: for all executables all parameters have the type STRING, if there is no implicit conversion for your parameter type you have to convert explicitly in your script. You can even pipe content to the executable with the same restriction (all piped values have the type STRING).
 
 ### Password security:
-Never store passwords in your compiled script! One can simply decompile the script with the parameter -extract. For example 
+Never store passwords in your compiled script! One can simply decompile the script with the parameter -extract. For example
 ```powershell
 Output.exe -extract:C:\Output.ps1
 ```
-will decompile the script stored in Output.exe.
+will decompile the script stored in Output.exe. And notice: the script (intentionally) is stored in clear text in the executable!
 
 ### Script variables:
-Since PS2EXE converts a script to an executable, script related variables are not available anymore. Especially the variable $PSScriptRoot is empty.
+Since PS2EXE converts a script to an executable, script related variables are not available anymore. The variable $MyInvocation is set to other values than in a script.
 
-The variable $MyInvocation is set to other values than in a script.
+Especially the variable $PSScriptRoot is empty - you can use $ScriptRoot as an replacement.
 
-You can retrieve the script/executable path independant of compiled/not compiled with the following code (thanks to JacquesFS):
+You can get $PSScriptRoot independently of compiled/not compiled with the following code line:
 
 ```powershell
-if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript")
- { $ScriptPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition }
- else
- { $ScriptPath = Split-Path -Parent -Path ([Environment]::GetCommandLineArgs()[0]) 
-     if (!$ScriptPath){ $ScriptPath = "." } }
+if (!$PSScriptRoot) { $PSScriptRoot = $ScriptRoot }
 ```
 
 ### Window in background in -noConsole mode:
@@ -154,6 +152,10 @@ $Host.UI.RawUI.FlushInputBuffer()
 ```
 
 ## Changes:
+### 1.0.18 - 2026-06-06
+- predefined variable $ScriptRoot as replacement for $PSScriptRoot
+- new version of Win-PS2EXE
+
 ### 1.0.17 / 2025-08-21
 - new parameter -embedFiles to embed files in compiled executable
 
